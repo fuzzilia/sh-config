@@ -1,32 +1,31 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import './App.css';
-import {
-  AppBar,
-  Box,
-  Button,
-  Card,
-  CardHeader,
-  Checkbox,
-  Container,
-  CssBaseline,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
-  FormLabel,
-  makeStyles,
-  Typography
-} from '@material-ui/core';
+import React, {useCallback, useMemo, useState} from 'react';
+import AppBar from '@material-ui/core/AppBar';
+import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
+import Card from '@material-ui/core/Card';
+import CardHeader from '@material-ui/core/CardHeader';
+import Checkbox from '@material-ui/core/Checkbox';
+import Container from '@material-ui/core/Container';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormLabel from '@material-ui/core/FormLabel';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import Typography from '@material-ui/core/Typography';
+
 import {
   applicationNames,
-  applicationShortCutDefinitions, applicationShortcutsForOs,
+  applicationShortCutDefinitions,
+  applicationShortcutsForOs,
   buildDefaultKeyConfigsForCombinationButtons,
   defaultCombinationButtons,
   defaultKeyConfigs,
-  MaxCombinationButtonCount
+  MaxCombinationButtonCount,
 } from './models/KeyConfig';
-import { ApplicationShortCut, KeyConfig, KeyConfigsByCombinationButtonState, OsType } from './types';
-import { writeKeyConfig } from './models/writeKeyConfig';
-import { KeyConfigExpansionPanel } from './components/KeyConfigExpansionPanel';
+import {ApplicationShortCut, KeyConfig, KeyConfigsByCombinationButtonState, OsType} from './types';
+import {writeKeyConfig} from './models/writeKeyConfig';
+import {KeyConfigExpansionPanel} from './components/KeyConfigExpansionPanel';
 import InputLabel from '@material-ui/core/InputLabel';
 import NativeSelect from '@material-ui/core/NativeSelect';
 
@@ -36,9 +35,8 @@ function replaceAt<T>(values: readonly T[], newValue: T, at: number): T[] {
   return newValues;
 }
 
-const useStyles = makeStyles(theme => ({
-  root: {
-  },
+const useStyles = makeStyles((theme) => ({
+  root: {},
   title: {
     flexGrow: 1,
     height: 40,
@@ -48,11 +46,11 @@ const useStyles = makeStyles(theme => ({
   },
   osSelect: {
     margin: theme.spacing(2),
-    width: 80
+    width: 80,
   },
   shortcutTypeControl: {
     margin: theme.spacing(2),
-    width: 180
+    width: 180,
   },
   headerForm: {
     margin: theme.spacing(2),
@@ -64,7 +62,7 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(2),
   },
   checkboxGroup: {
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
   submitButton: {
     margin: theme.spacing(2),
@@ -74,22 +72,27 @@ const useStyles = makeStyles(theme => ({
 
 const App: React.FC = () => {
   const classes = useStyles();
-  const [keyConfigs, setKeyConfigs] = useState<readonly Readonly<KeyConfigsByCombinationButtonState>[]>(defaultKeyConfigs);
+  const [keyConfigs, setKeyConfigs] =
+    useState<readonly Readonly<KeyConfigsByCombinationButtonState>[]>(defaultKeyConfigs);
   const [combinationButtons, setCombinationButtons] = useState<boolean[]>(defaultCombinationButtons);
   const [osType, setOsType] = useState<OsType | undefined>(undefined);
   const [application, setApplication] = useState<string | undefined>(undefined);
   const onChange = useCallback((combinationIndex: number, configIndex: number, keyConfig: KeyConfig) => {
     setKeyConfigs((prevKeyConfigs) => {
       const nextConfigs = replaceAt(prevKeyConfigs[combinationIndex].configs, keyConfig, configIndex);
-      return replaceAt(prevKeyConfigs, { ...prevKeyConfigs[combinationIndex], configs: nextConfigs }, combinationIndex);
+      return replaceAt(prevKeyConfigs, {...prevKeyConfigs[combinationIndex], configs: nextConfigs}, combinationIndex);
     });
   }, []);
   const applicationShortCuts = useMemo<readonly ApplicationShortCut[] | undefined>(() => {
-    if (!osType || !application) { return undefined; }
+    if (!osType || !application) {
+      return undefined;
+    }
     const index = applicationShortCutDefinitions.findIndex((applicationShortcut) => {
       return applicationShortcut.applicationName === application;
     });
-    if (index < 0) { return undefined; }
+    if (index < 0) {
+      return undefined;
+    }
     return applicationShortcutsForOs(applicationShortCutDefinitions[index], osType);
   }, [application, osType]);
   const onChangeCombinationButton = (index: number, checked: boolean) => {
@@ -121,11 +124,13 @@ const App: React.FC = () => {
                     inputProps={{
                       name: 'application',
                       id: 'application',
-                    }}
-                  >
+                    }}>
                     <option value="" />
-                    {applicationNames.map((applicationName) =>
-                      <option key={applicationName} value={applicationName}>{applicationName}</option>)}
+                    {applicationNames.map((applicationName) => (
+                      <option key={applicationName} value={applicationName}>
+                        {applicationName}
+                      </option>
+                    ))}
                   </NativeSelect>
                 </FormControl>
                 <FormControl className={classes.osSelect}>
@@ -136,8 +141,7 @@ const App: React.FC = () => {
                     inputProps={{
                       name: 'os-type',
                       id: 'os-type',
-                    }}
-                  >
+                    }}>
                     <option value="" />
                     <option value={OsType.IOS}>iOS</option>
                     <option value={OsType.MAC}>Mac</option>
@@ -152,7 +156,12 @@ const App: React.FC = () => {
                     {combinationButtons.map((isSelected, index) => (
                       <FormControlLabel
                         key={index}
-                        control={<Checkbox checked={isSelected} onChange={(e, checked) => onChangeCombinationButton(index, checked)} />}
+                        control={
+                          <Checkbox
+                            checked={isSelected}
+                            onChange={(e, checked) => onChangeCombinationButton(index, checked)}
+                          />
+                        }
                         label={index + 1}
                         disabled={checkedCount >= MaxCombinationButtonCount && !isSelected}
                       />
@@ -177,8 +186,7 @@ const App: React.FC = () => {
             variant="contained"
             color="primary"
             onClick={() => writeKeyConfig(keyConfigs)}
-            className={classes.submitButton}
-          >
+            className={classes.submitButton}>
             書き込み
           </Button>
         </Box>
