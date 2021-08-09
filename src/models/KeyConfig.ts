@@ -1,12 +1,16 @@
 import {
   ApplicationShortCut,
   ApplicationShortCutDefinition,
-  CombinationButtonState,
-  KeyConfig,
-  KeyConfigsByCombinationButtonState,
+  KeyConfigByCombination,
+  KeyConfigState,
   OsType,
-  ShortCut, Writable
+  ShortCut,
+  Writable,
 } from '../types';
+import {SHButtonConfig, SHConConfig, SHConConfigByCombination, SHStickConfig} from './SHConConfig';
+import {KeypadName, keypads} from './keypads';
+import {replaceAt, scalarArrayEquals} from './utils';
+import {ConfigStorageIndex} from './ConfigStorage';
 
 export const keyCodes = [
   ['A', 0x04],
@@ -108,105 +112,104 @@ export const keyCodeToKey = new Map<number, string>(keyCodes.map(([key, code]) =
 
 export const MaxButtonCount = 10;
 
-export function selectedCombinationButtonIndexes(combinationButtons: boolean[]): number[] {
-  const selectedIndexes: number[] = [];
-  for (let i = 0; i < combinationButtons.length; i++) {
-    if (combinationButtons[i]) {
-      selectedIndexes.push(i);
-    }
-  }
-  return selectedIndexes;
+export function combinationButtonCountToCombinationCount(combinationButtonCount: number): number {
+  return Math.pow(2, combinationButtonCount);
 }
 
-function buildEmptyConfigsWithoutCombinationButtons(combinationButtons: boolean[]): KeyConfig[] {
-  const keyConfigs: KeyConfig[] = [];
-  for (let i = 0; i < MaxButtonCount; i++) {
-    if (!combinationButtons[i]) {
-      keyConfigs.push({ buttonNumber: i + 1 });
+export function makeCombinations(combinationButtonCount: number): boolean[][] {
+  const combinationCount = combinationButtonCountToCombinationCount(combinationButtonCount);
+  const combinations: boolean[][] = [];
+  for (let i = 0; i < combinationCount; i++) {
+    combinations[i] = [];
+    for (let j = 0; j < combinationButtonCount; j++) {
+      combinations[i][j] = (i >> j) % 2 === 1;
     }
   }
-  return keyConfigs;
+  return combinations;
 }
 
-export function buildDefaultKeyConfigsForCombinationButtons(
-  combinationButtons: boolean[]
-): KeyConfigsByCombinationButtonState[] {
-  const selectedIndexes = selectedCombinationButtonIndexes(combinationButtons);
-  if (selectedIndexes.length === 0) {
-    return [{
-      combinationButtonStates: [],
-      configs: buildEmptyConfigsWithoutCombinationButtons(combinationButtons),
-    }];
-  }
-  let combinationButtonStates: CombinationButtonState[][] = [
-    [{ buttonNumber: selectedIndexes[0] + 1, isOn: false }],
-    [{ buttonNumber: selectedIndexes[0] + 1, isOn: true }],
-  ];
-  for (let i = 1; i < selectedIndexes.length; i++) {
-    const tmpCombinationState: CombinationButtonState[][] = [];
-    combinationButtonStates.forEach((combinationButtonState) => {
-      tmpCombinationState.push([...combinationButtonState, { buttonNumber: selectedIndexes[i] + 1, isOn: false }]);
-    });
-    combinationButtonStates.forEach((combinationButtonState) => {
-      tmpCombinationState.push([...combinationButtonState, { buttonNumber: selectedIndexes[i] + 1, isOn: true }]);
-    });
-    combinationButtonStates = tmpCombinationState;
-  }
-  return combinationButtonStates.map((states) => ({
-    combinationButtonStates: states,
-    configs: buildEmptyConfigsWithoutCombinationButtons(combinationButtons)
-  }));
+export function changeSelectedCombinationButton(prev: KeyConfigState, buttonNames: readonly string[]): KeyConfigState {
+  const combinations = makeCombinations(buttonNames.length);
+  const prevCombinations = makeCombinations(prev.selectedCombinationButtonNames.length);
+  return {
+    ...prev,
+    selectedCombinationButtonNames: buttonNames,
+    configsByCombination: combinations.map((combination) => {
+      const buttonNamesForCombination = buttonNames.filter((_, i) => combination[i]);
+      for (let prevCombinationIndex = 0; prevCombinationIndex < prevCombinations.length; prevCombinationIndex++) {
+        const prevCombination = prevCombinations[prevCombinationIndex];
+        const prevButtonNamesForCombination = prev.selectedCombinationButtonNames.filter((_, i) => prevCombination[i]);
+        if (scalarArrayEquals(buttonNamesForCombination, prevButtonNamesForCombination)) {
+          return prev.configsByCombination[prevCombinationIndex];
+        }
+      }
+      return defaultKeyConfigByCombination;
+    }),
+  };
 }
 
 export const MaxCombinationButtonCount = 3;
 export const defaultCombinationButtons: boolean[] = [
   ...Array(MaxButtonCount - MaxCombinationButtonCount).fill(false),
-  ...Array(MaxCombinationButtonCount).fill(true)
+  ...Array(MaxCombinationButtonCount).fill(true),
 ];
 
-export const defaultKeyConfigs: readonly Readonly<KeyConfigsByCombinationButtonState>[] =
-  buildDefaultKeyConfigsForCombinationButtons(defaultCombinationButtons);
-const mutableDefaultKeyConfigs = defaultKeyConfigs as KeyConfigsByCombinationButtonState[];
-mutableDefaultKeyConfigs[0] = {
-  combinationButtonStates: defaultKeyConfigs[0].combinationButtonStates,
-  configs: [
-    { buttonNumber: 1, key: keyToKeyCode.get('C') },
-    { buttonNumber: 2, key: keyToKeyCode.get('X') },
-    { buttonNumber: 3, key: keyToKeyCode.get('V') },
-    ...defaultKeyConfigs[0].configs.slice(3)
-  ]
+export const defaultKeyConfigByCombination: KeyConfigByCombination = {
+  buttons: [],
+  sticks: [],
+};
+
+export const defaultKeyConfigsByKeypadName: Record<KeypadName, Omit<KeyConfigState, 'id' | 'createdAt'>> = {
+  'sh-controller-v1': {
+    label: '名称未設定',
+    selectedKeypad: 'sh-controller-v1',
+    selectedCombinationButtonNames: ['8', '9', '10'],
+    configsByCombination: [...Array(8)].map(() => defaultKeyConfigByCombination),
+  },
+  'joy-con-L': {
+    label: '名称未設定',
+    selectedKeypad: 'joy-con-L',
+    selectedCombinationButtonNames: ['l', 'zl'],
+    configsByCombination: [...Array(4)].map(() => defaultKeyConfigByCombination),
+  },
+  'joy-con-R': {
+    label: '名称未設定',
+    selectedKeypad: 'joy-con-R',
+    selectedCombinationButtonNames: ['r', 'zr'],
+    configsByCombination: [...Array(4)].map(() => defaultKeyConfigByCombination),
+  },
 };
 
 export const applicationShortCutDefinitions: readonly ApplicationShortCutDefinition[] = [
   {
     applicationName: '一般',
     shortcuts: [
-      { functionName: 'コピー', general: { controlOrCmd: true, key: keyToKeyCode.get('C')! } },
-      { functionName: '切り取り', general: { controlOrCmd: true, key: keyToKeyCode.get('X')! } },
-      { functionName: '貼り付け', general: { controlOrCmd: true, key: keyToKeyCode.get('V')! } },
-      { functionName: '取り消し', general: { controlOrCmd: true, key: keyToKeyCode.get('Z')! } },
-    ]
+      {functionName: 'コピー', general: {controlOrCmd: true, key: keyToKeyCode.get('C')!}},
+      {functionName: '切り取り', general: {controlOrCmd: true, key: keyToKeyCode.get('X')!}},
+      {functionName: '貼り付け', general: {controlOrCmd: true, key: keyToKeyCode.get('V')!}},
+      {functionName: '取り消し', general: {controlOrCmd: true, key: keyToKeyCode.get('Z')!}},
+    ],
   },
   {
     applicationName: 'Procreate',
     shortcuts: [
-      { functionName: 'ペイントツール', general: { key: keyToKeyCode.get('B')! } },
-      { functionName: '消しゴム', general: { key: keyToKeyCode.get('E')! } },
-      { functionName: '色選択', general: { key: keyToKeyCode.get('C')! } },
-      { functionName: '選択モード', general: { key: keyToKeyCode.get('S')! } },
-      { functionName: 'レイヤー', general: { key: keyToKeyCode.get('L')! } },
-      { functionName: 'ブラシサイズ1%増', general: { controlOrCmd: true, key: keyToKeyCode.get(']')! } },
-      { functionName: 'ブラシサイズ10%増', general: { shift: true, key: keyToKeyCode.get(']')! } },
-      { functionName: 'ブラシサイズ1%減', general: { controlOrCmd: true, key: keyToKeyCode.get('[')! } },
-      { functionName: 'ブラシサイズ10%減', general: { shift: true, key: keyToKeyCode.get('[')! } },
-      { functionName: 'コピー', general: { controlOrCmd: true, key: keyToKeyCode.get('C')! } },
-      { functionName: '切り取り', general: { controlOrCmd: true, key: keyToKeyCode.get('X')! } },
-      { functionName: '貼り付け', general: { controlOrCmd: true, key: keyToKeyCode.get('V')! } },
-      { functionName: '取り消し', general: { controlOrCmd: true, key: keyToKeyCode.get('Z')! } },
-      { functionName: 'やり直す', general: { controlOrCmd: true, shift: true, key: keyToKeyCode.get('Z')! } },
-      { functionName: 'スポイト', general: { alt: true } },
-      { functionName: 'スポイト', general: { alt: true } },
-    ]
+      {functionName: 'ペイントツール', general: {key: keyToKeyCode.get('B')!}},
+      {functionName: '消しゴム', general: {key: keyToKeyCode.get('E')!}},
+      {functionName: '色選択', general: {key: keyToKeyCode.get('C')!}},
+      {functionName: '選択モード', general: {key: keyToKeyCode.get('S')!}},
+      {functionName: 'レイヤー', general: {key: keyToKeyCode.get('L')!}},
+      {functionName: 'ブラシサイズ1%増', general: {controlOrCmd: true, key: keyToKeyCode.get(']')!}},
+      {functionName: 'ブラシサイズ10%増', general: {shift: true, key: keyToKeyCode.get(']')!}},
+      {functionName: 'ブラシサイズ1%減', general: {controlOrCmd: true, key: keyToKeyCode.get('[')!}},
+      {functionName: 'ブラシサイズ10%減', general: {shift: true, key: keyToKeyCode.get('[')!}},
+      {functionName: 'コピー', general: {controlOrCmd: true, key: keyToKeyCode.get('C')!}},
+      {functionName: '切り取り', general: {controlOrCmd: true, key: keyToKeyCode.get('X')!}},
+      {functionName: '貼り付け', general: {controlOrCmd: true, key: keyToKeyCode.get('V')!}},
+      {functionName: '取り消し', general: {controlOrCmd: true, key: keyToKeyCode.get('Z')!}},
+      {functionName: 'やり直す', general: {controlOrCmd: true, shift: true, key: keyToKeyCode.get('Z')!}},
+      {functionName: 'スポイト', general: {alt: true}},
+      {functionName: 'スポイト', general: {alt: true}},
+    ],
   },
 ];
 
@@ -217,27 +220,141 @@ export function isEqualKey(a: number | undefined, b: number | undefined): boolea
 }
 
 export function isEqualShortCut(a: ShortCut, b: ShortCut): boolean {
-  return isEqualKey(a.key, b.key) &&
-    !a.shift === !b.shift &&
-    !a.control === !b.control &&
-    !a.alt === !b.alt &&
-    !a.gui === !b.gui;
+  return (
+    isEqualKey(a.key, b.key) && !a.shift === !b.shift && !a.ctrl === !b.ctrl && !a.alt === !b.alt && !a.gui === !b.gui
+  );
 }
 
-export function applicationShortcutsForOs(definition: ApplicationShortCutDefinition, os: OsType): readonly ApplicationShortCut[] {
+export function applicationShortcutsForOs(
+  definition: ApplicationShortCutDefinition,
+  os: OsType,
+): readonly ApplicationShortCut[] {
   return definition.shortcuts.map((shortcut) => {
-    const applicationShortCut: Writable<ApplicationShortCut> = { functionName: shortcut.functionName };
+    const applicationShortCut: Writable<ApplicationShortCut> = {functionName: shortcut.functionName};
     if (os === OsType.WINDOWS) {
-      if (shortcut.general?.key) { applicationShortCut.key = shortcut.general.key; }
+      if (shortcut.general?.key) {
+        applicationShortCut.key = shortcut.general.key;
+      }
       applicationShortCut.shift = shortcut.general?.shift;
       applicationShortCut.alt = shortcut.general?.alt;
-      applicationShortCut.control = shortcut.general?.controlOrCmd;
+      applicationShortCut.ctrl = shortcut.general?.controlOrCmd;
     } else {
-      if (shortcut.general?.key) { applicationShortCut.key = shortcut.general.key; }
+      if (shortcut.general?.key) {
+        applicationShortCut.key = shortcut.general.key;
+      }
       applicationShortCut.shift = shortcut.general?.shift;
       applicationShortCut.alt = shortcut.general?.alt;
       applicationShortCut.gui = shortcut.general?.controlOrCmd;
     }
     return applicationShortCut;
   });
+}
+
+export function setConfigForCombinationForKeyConfigState(
+  prevState: KeyConfigState,
+  combinationIndex: number,
+  config: KeyConfigByCombination,
+): KeyConfigState {
+  return {...prevState, configsByCombination: replaceAt(prevState.configsByCombination, config, combinationIndex)};
+}
+
+export function setButtonConfigForKeyConfigState(
+  prevState: KeyConfigState,
+  combinationIndex: number,
+  buttonIndex: number,
+  config: SHButtonConfig,
+): KeyConfigState {
+  const prevConfigForCombination = prevState.configsByCombination[combinationIndex];
+  return setConfigForCombinationForKeyConfigState(prevState, combinationIndex, {
+    ...prevConfigForCombination,
+    buttons: replaceAt(prevConfigForCombination.buttons, config, buttonIndex),
+  });
+}
+
+export function setStickConfigForKeyConfigState(
+  prevState: KeyConfigState,
+  combinationIndex: number,
+  stickIndex: number,
+  config: SHStickConfig,
+): KeyConfigState {
+  const prevConfigForCombination = prevState.configsByCombination[combinationIndex];
+  return setConfigForCombinationForKeyConfigState(prevState, combinationIndex, {
+    ...prevConfigForCombination,
+    sticks: replaceAt(prevConfigForCombination.sticks, config, stickIndex),
+  });
+}
+
+export function shConfigCombinationKey(
+  combinationButtonNames: readonly string[],
+  combination: readonly boolean[],
+): string {
+  return combinationButtonNames.map((name, index) => (combination[index] ? name : '')).join('-');
+}
+
+export function keyConfigStateToSHConfig(state: KeyConfigState): SHConConfig {
+  if (!state.selectedKeypad) {
+    throw new Error('キーパッドを選択していない状態で設定に変換することはできません。');
+  }
+  const keypad = keypads.find((keypad) => keypad.name === state.selectedKeypad);
+  if (!keypad) {
+    throw new Error('キーパッドが見つかりません。');
+  }
+
+  const commandButtons = keypad.buttons.filter((button) => !state.selectedCombinationButtonNames.includes(button.name));
+  const configsByCombination: {[key: string]: SHConConfigByCombination} = {};
+  makeCombinations(state.selectedCombinationButtonNames.length).forEach((combination, combinationIndex) => {
+    const configs = state.configsByCombination[combinationIndex];
+    const buttons: {[key: string]: SHButtonConfig | undefined} = {};
+    const sticks: {[ke: string]: SHStickConfig | undefined} = {};
+    commandButtons.forEach((button, buttonIndex) => {
+      buttons[button.name] = configs.buttons[buttonIndex];
+    });
+    keypad.sticks.forEach((stick, stickIndex) => {
+      sticks[stick.name] = configs.sticks[stickIndex];
+    });
+    const key = shConfigCombinationKey(state.selectedCombinationButtonNames, combination);
+    configsByCombination[key] = {buttons, sticks};
+  });
+  return {
+    keypadName: state.selectedKeypad,
+    combinationButtonNames: state.selectedCombinationButtonNames,
+    configsByCombination,
+  };
+}
+
+export function shConfigToKeyConfigState(storageIndex: ConfigStorageIndex, config: SHConConfig): KeyConfigState {
+  const keypad = keypads.find((keypad) => keypad.name === config.keypadName);
+  if (!keypad) {
+    throw new Error('invalid keypad name.');
+  }
+  const buttonNameSet = new Set<string>(keypad.buttons.map(({name}) => name));
+  if (!Array.isArray(config.combinationButtonNames)) {
+    throw new Error('combination button names is not array.');
+  }
+  if (!config.combinationButtonNames.every((buttonName) => buttonNameSet.has(buttonName))) {
+    throw new Error('invalid combination button name.');
+  }
+  const commandButtons = keypad.buttons.filter((button) => !config.combinationButtonNames.includes(button.name));
+  const configsByCombination: KeyConfigByCombination[] = [];
+  makeCombinations(config.combinationButtonNames.length).forEach((combination) => {
+    const key = shConfigCombinationKey(config.combinationButtonNames, combination);
+    const configForCombination = config.configsByCombination[key];
+    const buttons: (SHButtonConfig | undefined)[] = [];
+    const sticks: (SHStickConfig | undefined)[] = [];
+    commandButtons.forEach((button) => {
+      buttons.push(configForCombination.buttons[button.name]);
+    });
+    keypad.sticks.forEach((stick) => {
+      sticks.push(configForCombination.sticks[stick.name]);
+    });
+    // TODO バリデーション (結構大変なのでしばらく着手しない)
+    configsByCombination.push({buttons, sticks});
+  });
+
+  return {
+    ...storageIndex,
+    selectedKeypad: config.keypadName,
+    selectedCombinationButtonNames: config.combinationButtonNames,
+    configsByCombination,
+  };
 }

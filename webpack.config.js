@@ -5,6 +5,8 @@ const CopyPlugin = require('copy-webpack-plugin');
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 module.exports = {
+  target: process.env.NODE_ENV !== 'production' ? 'web' : 'browserslist',
+
   entry: './src/index.tsx',
 
   output: {
@@ -17,11 +19,14 @@ module.exports = {
       {
         test: /\.tsx?$/,
         exclude: /node_modules/,
-        loader: 'babel-loader',
-      },
-      {
-        test: /\.css$/i,
-        use: ['style-loader', 'css-loader'],
+        use: [
+          {
+            loader: require.resolve('babel-loader'),
+            options: {
+              plugins: [isDevelopment && require.resolve('react-refresh/babel')].filter(Boolean),
+            },
+          },
+        ],
       },
     ],
   },
