@@ -10,3 +10,7 @@ export function scalarArrayEquals<T extends number | string>(a: readonly T[], b:
   }
   return a.every((v, i) => v === b[i]);
 }
+
+export async function waitAsync(timeout: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, timeout));
+}

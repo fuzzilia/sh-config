@@ -21,6 +21,7 @@ import Typography from '@material-ui/core/Typography';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import {Keypad} from '../models/keypads';
 import {rotateMotionLabelsByAxis} from './ButtonConfigRow';
+import {waitAsync} from '../models/utils';
 
 const useStyles = makeStyles((theme) => ({
   label: {
@@ -95,6 +96,7 @@ export const JoyConTestModal: React.FC<JoyConTestModalProps> = ({keypad, configS
           await joyCon.open();
         }
         await joyCon.setInputReportMode(JoyConInputReportMode.Full);
+        await waitAsync(100);
         await joyCon.enableIMU(true);
 
         let joyConInput: JoyConInput | undefined = undefined;
