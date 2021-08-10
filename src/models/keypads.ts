@@ -13,6 +13,7 @@ export interface KeypadStick {
 export interface Keypad {
   readonly name: string;
   readonly label: string;
+  readonly id: number;
   readonly buttons: readonly KeypadButton[];
   readonly sticks: readonly KeypadStick[];
   readonly has6AxisSensor?: boolean;
@@ -25,6 +26,7 @@ function inferKeypadType<T extends Keypad>(keypad: T): Omit<T, 'buttons'> & Keyp
 export const keypadJoyConL = inferKeypadType({
   name: 'joy-con-L',
   label: 'JoyCon (L)',
+  id: 0x0081,
   buttons: [
     {name: 'up', number: 1, label: '↑ボタン'},
     {name: 'right', number: 2, label: '→ボタン'},
@@ -45,6 +47,7 @@ export const keypadJoyConL = inferKeypadType({
 export const keypadJoyConR = inferKeypadType({
   name: 'joy-con-R',
   label: 'JoyCon (R)',
+  id: 0x0082,
   buttons: [
     {name: 'y', number: 0, label: 'Yボタン'},
     {name: 'x', number: 1, label: 'Xボタン'},
@@ -65,6 +68,7 @@ export const keypadJoyConR = inferKeypadType({
 export const keypadShControllerV1 = inferKeypadType({
   name: 'sh-controller-v1',
   label: 'SH-Controller v1',
+  id: 0x0001,
   buttons: [
     {name: '1', number: 0, label: 'ボタン1'},
     {name: '2', number: 1, label: 'ボタン2'},

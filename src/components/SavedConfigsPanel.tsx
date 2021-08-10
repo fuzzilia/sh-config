@@ -7,7 +7,7 @@ import IconButton from '@material-ui/core/IconButton';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import DeleteIcon from '@material-ui/icons/Delete';
 import {KeyConfigState} from '../types';
-import {shConfigToKeyConfigState} from '../models/KeyConfig';
+import {shConfigToKeyConfigState} from '../models/SHConConfig';
 
 interface SavedConfigsPanelProps {
   onLoad(config: KeyConfigState): void;

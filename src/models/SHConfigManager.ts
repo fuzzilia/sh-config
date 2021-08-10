@@ -1,6 +1,6 @@
-import {SHButtonConfig, SHConConfig, SHStickConfig} from './SHConConfig';
+import {SHButtonConfig, SHConConfig, shConfigCombinationKey, SHStickConfig} from './SHConConfig';
 import {Keypad, KeypadButton, keypads, KeypadStick} from './keypads';
-import {makeCombinations, shConfigCombinationKey} from './KeyConfig';
+import {makeCombinations} from './KeyConfig';
 
 function combinationToIndex(combination: readonly boolean[]): number {
   let index = 0;

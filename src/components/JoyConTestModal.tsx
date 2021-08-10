@@ -12,9 +12,9 @@ import {
   SHMotionState,
   SHStickState,
 } from '../models/SHControllerManager';
-import {KeyConfig} from '../models/SHConConfig';
+import {KeyConfig, keyConfigStateToSHConfig} from '../models/SHConConfig';
 import {KeyConfigState} from '../types';
-import {keyCodeToKey, keyConfigStateToSHConfig} from '../models/KeyConfig';
+import {keyCodeToKey} from '../models/KeyConfig';
 import {SHConfigManager} from '../models/SHConfigManager';
 import {JoyCon, JoyConInput, JoyConInputReportMode, leftJoyConButtons, rightJoyConButtons} from '../models/JoyCon';
 import Typography from '@material-ui/core/Typography';

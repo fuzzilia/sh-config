@@ -14,9 +14,7 @@ import {
   applicationShortcutsForOs,
   changeSelectedCombinationButton,
   combinationButtonCountToCombinationCount,
-  keyConfigStateToSHConfig,
   makeCombinations,
-  setConfigForCombinationForKeyConfigState,
 } from './models/KeyConfig';
 import {ApplicationShortCut, KeyConfigByCombination, KeyConfigState, OsType, SetterFunc} from './types';
 import {KeyConfigAccordion} from './components/KeyConfigAccordion';
@@ -30,6 +28,9 @@ import {TextField} from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import {saveConfig} from './models/ConfigStorage';
 import {JoyConTestModal} from './components/JoyConTestModal';
+import {keyConfigStateToSHConfig, setConfigForCombinationForKeyConfigState} from './models/SHConConfig';
+import {encodeSHConfig} from './models/SHConfigEncoder';
+import {decodeSHConfig} from './models/SHConfigDecoder';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -172,6 +173,15 @@ export const App: React.FC = () => {
   const openTestModal = useCallback(() => setTestModalIsOpen(true), []);
   const closeTestModal = useCallback(() => setTestModalIsOpen(false), []);
 
+  let dataSize = 0;
+  if (configState?.selectedKeypad) {
+    const originConfig = keyConfigStateToSHConfig(configState);
+    const encoded = encodeSHConfig(keypads, originConfig);
+    dataSize = encoded.size;
+    // const decoded = decodeSHConfig(keypads, encoded.buffer);
+    // console.log({originConfig, encoded, decoded});
+  }
+
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -218,7 +228,7 @@ export const App: React.FC = () => {
             <Box className={classes.rootBox}>
               <Card className={classes.typeConfigCard}>
                 <CardHeader
-                  title="全体設定"
+                  title="基本設定"
                   action={
                     <Button variant="outlined" color="secondary" onClick={clean}>
                       初期画面に戻る
@@ -236,6 +246,10 @@ export const App: React.FC = () => {
                     <Button variant="outlined" color="primary" onClick={save} className={classes.formOptionButton}>
                       ブラウザに保存
                     </Button>
+                  </Box>
+                  <Box className={classes.formRow}>
+                    <Typography className={classes.formLabel}>データサイズ : </Typography>
+                    <Typography className={classes.formValue}>{dataSize}</Typography>
                   </Box>
                   <Box className={classes.formRow}>
                     <Typography className={classes.formLabel}>デバイス : </Typography>
