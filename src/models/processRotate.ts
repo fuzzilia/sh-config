@@ -52,7 +52,7 @@ export function processRotateRelative(
   const countDiff = count - state.count;
   const direction = countDiffDirection(countDiff);
   return {
-    countDiff: count - state.count,
+    countDiff,
     state: {
       lastRotate: currentRotate,
       firstDirection: state.firstDirection || direction,

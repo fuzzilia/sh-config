@@ -40,7 +40,7 @@ function writePositiveAndNegativeKeys(writer: DataWriter, config: PositiveAndNeg
   writer.writeUint8(config?.negative?.key ?? 0);
 }
 
-export function encodeSHConfig(keypads: readonly Keypad[], config: SHConConfig): {buffer: ArrayBuffer; size: number} {
+export function encodeSHConfig(keypads: readonly Keypad[], config: SHConConfig): ArrayBuffer {
   const keypad = keypads.find((keypad) => keypad.name === config.keypadName);
   if (!keypad) {
     throw new Error('Unknown keypad ' + config.keypadName);
@@ -201,7 +201,7 @@ export function encodeSHConfig(keypads: readonly Keypad[], config: SHConConfig):
     }
   });
 
-  return {buffer: writer.buffer, size: writer.offset};
+  return writer.exportBuffer();
 }
 
 class DataWriter {
@@ -219,5 +219,9 @@ class DataWriter {
   public writeUint16(value: number): void {
     this.view.setUint16(this.offset, value, true);
     this.offset += 2;
+  }
+
+  public exportBuffer(): ArrayBuffer {
+    return this.buffer.slice(0, this.offset);
   }
 }

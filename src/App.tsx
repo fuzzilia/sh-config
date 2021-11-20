@@ -177,7 +177,8 @@ export const App: React.FC = () => {
   if (configState?.selectedKeypad) {
     const originConfig = keyConfigStateToSHConfig(configState);
     const encoded = encodeSHConfig(keypads, originConfig);
-    dataSize = encoded.size;
+    dataSize = encoded.byteLength;
+    console.log(encoded);
     // const decoded = decodeSHConfig(keypads, encoded.buffer);
     // console.log({originConfig, encoded, decoded});
   }
@@ -260,6 +261,47 @@ export const App: React.FC = () => {
                       onClick={openTestModal}
                       className={classes.formOptionButton}>
                       ブラウザで試す
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={async () => {
+                        if (!navigator.bluetooth) {
+                          alert('WebBLE未対応のブラウザです。');
+                          return;
+                        }
+                        const KeyConfigServiceUuid = '20FDDC1C-6B54-4523-A8DD-728B79F7525F'.toLowerCase();
+                        const KeyConfigCharacteristicUuid = 'AE96F2AE-7485-4B8C-8E79-B353546A47EE'.toLowerCase();
+
+                        const device = await navigator.bluetooth.requestDevice({
+                          acceptAllDevices: true,
+                          optionalServices: [KeyConfigServiceUuid],
+                        });
+                        if (!device.gatt) {
+                          alert('デバイスが見つかりませんでした。');
+                          return;
+                        }
+
+                        try {
+                          console.log('start connect');
+                          const gatt = await device.gatt!.connect();
+                          console.log('gatt');
+                          const services = await gatt.getPrimaryService(KeyConfigServiceUuid);
+                          console.log('services');
+                          const characteristic = await services.getCharacteristic(KeyConfigCharacteristicUuid);
+                          console.log('characteristic');
+                          const originConfig = keyConfigStateToSHConfig(configState);
+                          const encoded = encodeSHConfig(keypads, originConfig);
+                          await characteristic.writeValue(encoded);
+                          alert('書き込み完了しました。');
+                          gatt.disconnect();
+                        } catch (error) {
+                          alert('なんかエラー出た…');
+                          console.error(error.toString());
+                        }
+                      }}
+                      className={classes.formOptionButton}>
+                      書き込み
                     </Button>
                   </Box>
                   <SelectedCombinationButtonView
