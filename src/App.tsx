@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Box from '@material-ui/core/Box';
 import Card from '@material-ui/core/Card';
@@ -31,6 +31,7 @@ import {JoyConTestModal} from './components/JoyConTestModal';
 import {keyConfigStateToSHConfig, setConfigForCombinationForKeyConfigState} from './models/SHConConfig';
 import {encodeSHConfig} from './models/SHConfigEncoder';
 import {decodeSHConfig} from './models/SHConfigDecoder';
+import {KeyConfigService} from './models/KeyConfigService';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -100,6 +101,7 @@ const useStyles = makeStyles((theme) => ({
 
 export const App: React.FC = () => {
   const classes = useStyles();
+  const keyConfigServiceRef = useRef<KeyConfigService>();
   const [configState, setConfigState] = useState<KeyConfigState | undefined>(undefined);
   const [lastSavedConfig, setLastSavedConfig] = useState<KeyConfigState | undefined>(undefined);
   const [combinationIsFixed, setCombinationIsFixed] = useState<boolean>(false);
@@ -172,6 +174,53 @@ export const App: React.FC = () => {
   };
   const openTestModal = useCallback(() => setTestModalIsOpen(true), []);
   const closeTestModal = useCallback(() => setTestModalIsOpen(false), []);
+
+  const connect = useCallback(async () => {
+    if (!keyConfigServiceRef.current) {
+      try {
+        if (!navigator.bluetooth) {
+          alert('WebBLE未対応のブラウザです。');
+          return;
+        }
+        const service = await KeyConfigService.connect(navigator.bluetooth);
+        if (!service) {
+          return;
+        }
+        keyConfigServiceRef.current = service;
+      } catch (error) {
+        console.error(error);
+        alert(error?.message ?? '不明なエラーが発生しました。');
+      }
+    }
+  }, []);
+  const writeConfig = useCallback(async () => {
+    if (!keyConfigServiceRef.current) {
+      alert('未接続です。');
+      return;
+    }
+    if (!configState) {
+      alert('設定がありません。');
+      return;
+    }
+    try {
+      await keyConfigServiceRef.current.writeConfig(keyConfigStateToSHConfig(configState));
+    } catch (error) {
+      console.error(error);
+      alert(error?.message ?? '不明なエラーが発生しました。');
+    }
+  }, [configState]);
+  const scan = useCallback(async () => {
+    if (!keyConfigServiceRef.current) {
+      alert('未接続です。');
+      return;
+    }
+    try {
+      await keyConfigServiceRef.current.scan();
+    } catch (error) {
+      console.error(error);
+      alert(error?.message ?? '不明なエラーが発生しました。');
+    }
+  }, []);
 
   let dataSize = 0;
   if (configState?.selectedKeypad) {
@@ -262,46 +311,18 @@ export const App: React.FC = () => {
                       className={classes.formOptionButton}>
                       ブラウザで試す
                     </Button>
+                    <Button variant="outlined" color="primary" onClick={connect} className={classes.formOptionButton}>
+                      接続
+                    </Button>
                     <Button
                       variant="outlined"
                       color="primary"
-                      onClick={async () => {
-                        if (!navigator.bluetooth) {
-                          alert('WebBLE未対応のブラウザです。');
-                          return;
-                        }
-                        const KeyConfigServiceUuid = '20FDDC1C-6B54-4523-A8DD-728B79F7525F'.toLowerCase();
-                        const KeyConfigCharacteristicUuid = 'AE96F2AE-7485-4B8C-8E79-B353546A47EE'.toLowerCase();
-
-                        const device = await navigator.bluetooth.requestDevice({
-                          acceptAllDevices: true,
-                          optionalServices: [KeyConfigServiceUuid],
-                        });
-                        if (!device.gatt) {
-                          alert('デバイスが見つかりませんでした。');
-                          return;
-                        }
-
-                        try {
-                          console.log('start connect');
-                          const gatt = await device.gatt!.connect();
-                          console.log('gatt');
-                          const services = await gatt.getPrimaryService(KeyConfigServiceUuid);
-                          console.log('services');
-                          const characteristic = await services.getCharacteristic(KeyConfigCharacteristicUuid);
-                          console.log('characteristic');
-                          const originConfig = keyConfigStateToSHConfig(configState);
-                          const encoded = encodeSHConfig(keypads, originConfig);
-                          await characteristic.writeValue(encoded);
-                          alert('書き込み完了しました。');
-                          gatt.disconnect();
-                        } catch (error) {
-                          alert('なんかエラー出た…');
-                          console.error(error.toString());
-                        }
-                      }}
+                      onClick={writeConfig}
                       className={classes.formOptionButton}>
                       書き込み
+                    </Button>
+                    <Button variant="outlined" color="primary" onClick={scan} className={classes.formOptionButton}>
+                      ペアリング
                     </Button>
                   </Box>
                   <SelectedCombinationButtonView
