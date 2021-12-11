@@ -32,6 +32,7 @@ import {keyConfigStateToSHConfig, setConfigForCombinationForKeyConfigState} from
 import {encodeSHConfig} from './models/SHConfigEncoder';
 import {decodeSHConfig} from './models/SHConfigDecoder';
 import {KeyConfigService} from './models/KeyConfigService';
+import {PairingModal} from './components/PairingModal';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -108,6 +109,7 @@ export const App: React.FC = () => {
   const [osType, setOsType] = useState<OsType | undefined>(undefined);
   const [application, setApplication] = useState<string | undefined>(undefined);
   const [testModalIsOpen, setTestModalIsOpen] = useState<boolean>(false);
+  const [pairingModelIsOpen, setPairingModalIsOpen] = useState<boolean>(false);
   const selectedKeypad: Keypad | undefined =
     configState && keypads.find((keypad) => keypad.name === configState.selectedKeypad);
   const combinationButtonCount = configState ? configState.selectedCombinationButtonNames.length : 0;
@@ -174,6 +176,7 @@ export const App: React.FC = () => {
   };
   const openTestModal = useCallback(() => setTestModalIsOpen(true), []);
   const closeTestModal = useCallback(() => setTestModalIsOpen(false), []);
+  const closePairingModal = useCallback(() => setPairingModalIsOpen(false), []);
 
   const connect = useCallback(async () => {
     if (!keyConfigServiceRef.current) {
@@ -209,18 +212,7 @@ export const App: React.FC = () => {
       alert(error?.message ?? '不明なエラーが発生しました。');
     }
   }, [configState]);
-  const scan = useCallback(async () => {
-    if (!keyConfigServiceRef.current) {
-      alert('未接続です。');
-      return;
-    }
-    try {
-      await keyConfigServiceRef.current.scan();
-    } catch (error) {
-      console.error(error);
-      alert(error?.message ?? '不明なエラーが発生しました。');
-    }
-  }, []);
+  const scan = useCallback(() => setPairingModalIsOpen(true), []);
 
   let dataSize = 0;
   if (configState?.selectedKeypad) {
@@ -386,6 +378,11 @@ export const App: React.FC = () => {
                 onClose={closeTestModal}
                 isOpen={testModalIsOpen}
                 configState={configState}
+              />
+              <PairingModal
+                keyConfigServiceRef={keyConfigServiceRef}
+                onClose={closePairingModal}
+                isOpen={pairingModelIsOpen}
               />
             </Box>
           ) : (

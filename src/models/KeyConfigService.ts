@@ -3,12 +3,45 @@ import {encodeSHConfig} from './SHConfigEncoder';
 import {keypads} from './keypads';
 
 const serviceUuid = '20FDDC1C-6B54-4523-A8DD-728B79F7525F'.toLowerCase();
-type CharacteristicName = 'config' | 'scanningActive' | 'foundDevices';
+type CharacteristicName = 'config' | 'scanningActive' | 'foundDevices' | 'connect';
 const characteristicUuids: Record<CharacteristicName, string> = {
   config: 'AE96F2AE-7485-4B8C-8E79-B353546A47EE'.toLowerCase(),
   scanningActive: 'C3EE3AC1-C303-4E02-8ED8-A0FB0C4DD6D8'.toLowerCase(),
   foundDevices: 'DC1BEEB8-19BD-4F91-A2FD-177BA51C0593'.toLowerCase(),
+  connect: '8F343F76-0ABC-4765-823C-EEA12D530E74'.toLowerCase(),
 };
+
+export interface FoundBluetoothDevice {
+  readonly name: string;
+  readonly uuid: Uint8Array;
+}
+
+export interface BluetoothDeviceScanResult {
+  readonly id: number;
+  readonly devices: readonly FoundBluetoothDevice[];
+}
+
+function parsedFoundDevices(data: DataView): BluetoothDeviceScanResult {
+  if (data.byteLength < 5) {
+    throw new Error('Bluetoothデバイスのスキャン結果が不正なデータでした。');
+  }
+  const size = data.getUint8(0);
+  const id = data.getUint32(1, true);
+  let offset = 5;
+  const devices: FoundBluetoothDevice[] = [];
+  for (let i = 0; i < size; i++) {
+    const segmentSize = data.getUint8(offset);
+    if (offset + segmentSize > data.byteLength) {
+      throw new Error('Bluetoothデバイスのスキャン結果が不正なデータでした。');
+    }
+    const nameOffset = 4 + 6;
+    const uuid = new Uint8Array(data.buffer, offset + 4, 6);
+    const name = new TextDecoder().decode(new DataView(data.buffer, offset + nameOffset, segmentSize - nameOffset));
+    devices.push({name, uuid});
+    offset += segmentSize;
+  }
+  return {id, devices};
+}
 
 export class KeyConfigService {
   public static async connect(bluetooth: Bluetooth): Promise<KeyConfigService | undefined> {
@@ -45,8 +78,7 @@ export class KeyConfigService {
     if (!config) {
       throw new Error('設定値キャラクタリスティックが見つかりません。');
     }
-    // const scanningActive = characteristicMap.get(characteristicUuids.scanningActive);
-    const scanningActive = await service.getCharacteristic(characteristicUuids.scanningActive);
+    const scanningActive = characteristicMap.get(characteristicUuids.scanningActive);
     if (!scanningActive) {
       throw new Error('スキャン状態キャラクタリスティックが見つかりません。');
     }
@@ -54,27 +86,21 @@ export class KeyConfigService {
     if (!foundDevices) {
       throw new Error('スキャン結果キャラクタリスティックが見つかりません。');
     }
+    const connect = characteristicMap.get(characteristicUuids.connect);
+    if (!connect) {
+      throw new Error('接続キャラクタリスティックが見つかりません。');
+    }
 
     try {
-      // console.log('xxxx 1');
-      // if (scanningActive.properties.notify) {
-      //   scanningActive.addEventListener('characteristicvaluechanged', (event) => {
-      //     console.log('xxxx characteristicvaluechanged scanningActive', event);
-      //   });
-      //   await scanningActive.startNotifications();
-      // }
-      // console.log('xxxx 2');
-      // if (foundDevices.properties.notify) {
-      //   foundDevices.addEventListener('characteristicvaluechanged', (event) => {
-      //     console.log('xxxx characteristicvaluechanged foundDevices', event);
-      //   });
-      //   await foundDevices.startNotifications();
-      // }
+      await scanningActive.startNotifications();
     } catch (error) {
       throw new Error(`デバイスとの通信設定処理に失敗しました。 ${error}`);
     }
-    return new KeyConfigService(device, gattServer, service, {config, scanningActive, foundDevices});
+    return new KeyConfigService(device, gattServer, service, {config, scanningActive, foundDevices, connect});
   }
+
+  private resolveScanningEnd?: () => void;
+  private rejectScanningEnd?: (error: any) => void;
 
   public constructor(
     private device: BluetoothDevice,
@@ -84,24 +110,52 @@ export class KeyConfigService {
   ) {
     device.addEventListener('gattserverdisconnected', () => {
       console.log('xxxx gattserverdisconnected');
+      this.rejectScanningEnd?.(new Error('デバイスが切断されました。'));
+      this.resolveScanningEnd = undefined;
+      this.rejectScanningEnd = undefined;
     });
-    // characteristics.foundDevices.addEventListener('characteristicvaluechanged', (event) => {
-    //   console.log('xxxx characteristicvaluechanged foundDevices', event);
-    // });
-    // characteristics.scanningActive.addEventListener('characteristicvaluechanged', (event) => {
-    //   console.log('xxxx characteristicvaluechanged scanningActive', event);
-    // });
+    characteristics.scanningActive.addEventListener('characteristicvaluechanged', async (event) => {
+      if (this.resolveScanningEnd) {
+        const isScanning = await this.isScanning();
+        if (!isScanning) {
+          this.resolveScanningEnd?.();
+          this.resolveScanningEnd = undefined;
+          this.rejectScanningEnd = undefined;
+        }
+      }
+    });
   }
 
-  public async scan(): Promise<void> {
-    await this.characteristics.scanningActive.readValue();
-    this.characteristics.scanningActive.addEventListener('characteristicvaluechanged', (event) => {
-      console.log('xxxx characteristicvaluechanged scanningActive', event);
-    });
-    try {
-      await this.characteristics.scanningActive.startNotifications();
-    } catch {}
+  private async isScanning(): Promise<boolean> {
+    const char = this.characteristics.scanningActive;
+    if (char.value) {
+      return char.value.getUint8(0) !== 0;
+    } else {
+      const result = await char.readValue();
+      return result.getUint8(0) !== 0;
+    }
+  }
+
+  public async scan(): Promise<BluetoothDeviceScanResult> {
     await this.characteristics.scanningActive.writeValue(new Uint8Array([1]));
+    await new Promise<void>((resolve, reject) => {
+      this.resolveScanningEnd = resolve;
+      this.rejectScanningEnd = reject;
+    });
+    const foundDevicesData = await this.characteristics.foundDevices.readValue();
+    return parsedFoundDevices(foundDevicesData);
+  }
+
+  public async connect(id: number, deviceIndex: number, device: FoundBluetoothDevice): Promise<void> {
+    const buffer = new ArrayBuffer(11);
+    const view = new DataView(buffer);
+    view.setUint8(0, deviceIndex);
+    view.setUint32(1, id, true);
+    for (let i = 0; i < 6; i++) {
+      view.setUint8(5 + i, device.uuid[i]);
+    }
+    console.log('connect command data', buffer);
+    await this.characteristics.connect.writeValue(buffer);
   }
 
   public async writeConfig(config: SHConConfig): Promise<void> {
