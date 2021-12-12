@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import makeStyles from '@mui/material/styles/makeStyles';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -11,25 +10,7 @@ import Button from '@mui/material/Button';
 import {KeypadButton} from '../models/keypads';
 import {MaxCombinationButtonCount} from '../models/KeyConfig';
 import {replaceAt} from '../models/utils';
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  card: {
-    margin: theme.spacing(2),
-  },
-  checkboxGroup: {
-    margin: theme.spacing(2),
-    flexDirection: 'row',
-  },
-  form: {},
-  submitButton: {
-    margin: theme.spacing(2),
-    alignSelf: 'flex-end',
-  },
-}));
+import {styled} from '@mui/material';
 
 export interface SelectCombinationButtonPanelProps {
   readonly buttons: readonly KeypadButton[];
@@ -37,23 +18,41 @@ export interface SelectCombinationButtonPanelProps {
   onChange(selectedButtonNames: string[]): void;
 }
 
+const RootBox = styled(Box)`
+  display: flex;
+  flex-direction: column;
+`;
+
+const MainCard = styled(Card)`
+  margin: ${({theme}) => theme.spacing(2)};
+`;
+
+const CombinationCheckboxGroupBox = styled(Box)`
+  margin: ${({theme}) => theme.spacing(2)};
+  flex-direction: row;
+`;
+
+const SubmitButton = styled(Button)`
+  margin: ${({theme}) => theme.spacing(2)};
+  align-self: flex-end;
+`;
+
 export const SelectCombinationButtonPanel: React.FC<SelectCombinationButtonPanelProps> = ({
   buttons,
   defaultSelectedButtonNames,
   onChange,
 }) => {
-  const classes = useStyles();
   const [checkedStates, setCheckedState] = useState<readonly boolean[]>(
     buttons.map(({name}) => defaultSelectedButtonNames.has(name)),
   );
   const checkedCount = checkedStates.filter(Boolean).length;
   return (
-    <Box className={classes.root}>
-      <Card className={classes.card}>
+    <RootBox>
+      <MainCard>
         <CardHeader title="組み合わせボタン選択" />
-        <FormControl className={classes.form}>
+        <FormControl>
           <FormGroup>
-            <Box className={classes.checkboxGroup}>
+            <CombinationCheckboxGroupBox>
               {buttons.map(({name, label}, index) => (
                 <FormControlLabel
                   key={name}
@@ -67,17 +66,16 @@ export const SelectCombinationButtonPanel: React.FC<SelectCombinationButtonPanel
                   disabled={checkedCount >= MaxCombinationButtonCount && !checkedStates[index]}
                 />
               ))}
-            </Box>
+            </CombinationCheckboxGroupBox>
           </FormGroup>
-          <Button
+          <SubmitButton
             variant="contained"
             color="primary"
-            onClick={() => onChange(buttons.map(({name}) => name).filter((_, i) => checkedStates[i]))}
-            className={classes.submitButton}>
+            onClick={() => onChange(buttons.map(({name}) => name).filter((_, i) => checkedStates[i]))}>
             確定
-          </Button>
+          </SubmitButton>
         </FormControl>
-      </Card>
-    </Box>
+      </MainCard>
+    </RootBox>
   );
 };

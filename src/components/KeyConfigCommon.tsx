@@ -4,33 +4,35 @@ import {modifierFromStringValue, modifierKeyOptions, modifierKeyToStringValue} f
 import {KeyConfig} from '../models/SHConConfig';
 import {ApplicationShortCut} from '../types';
 import {isEqualShortCut, keyCodes} from '../models/KeyConfig';
-import {Keypad, KeypadButton} from '../models/keypads';
-import makeStyles from '@mui/material/styles/makeStyles';
+import {KeypadButton} from '../models/keypads';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
 import TableCell from '@mui/material/TableCell';
+import {styled} from '@mui/material';
+
+const CommonSelect = styled(NativeSelect)`
+  min-width: 70px;
+`;
 
 export interface ModifierKeySelectorProps {
   readonly onChange: (key: KeyConfig | undefined) => void;
   readonly keyConfig: KeyConfig | undefined;
-  readonly className: string;
 }
 
-export const ModifierKeySelector: React.FC<ModifierKeySelectorProps> = ({keyConfig, onChange, className}) => {
+export const ModifierKeySelector: React.FC<ModifierKeySelectorProps> = ({keyConfig, onChange}) => {
   return (
-    <NativeSelect
+    <CommonSelect
       value={modifierKeyToStringValue(keyConfig)}
-      onChange={(e) => onChange({key: keyConfig?.key, ...modifierFromStringValue(e.target.value)})}
-      className={className}>
+      onChange={(e) => onChange({key: keyConfig?.key, ...modifierFromStringValue(e.target.value)})}>
       <option value="" />
       {modifierKeyOptions.map(({label, value}) => (
         <option key={value} value={value}>
           {label}
         </option>
       ))}
-    </NativeSelect>
+    </CommonSelect>
   );
 };
 
@@ -52,70 +54,66 @@ function keyConfigFromShortCut(applicationShortCuts: readonly ApplicationShortCu
 interface ApplicationShortcutSelectorProps {
   readonly onChange: (key: KeyConfig | undefined) => void;
   readonly keyConfig: KeyConfig | undefined;
-  readonly className: string;
   readonly applicationShortCuts: readonly ApplicationShortCut[];
 }
 
 export const ApplicationShortcutSelector: React.FC<ApplicationShortcutSelectorProps> = ({
   onChange,
   keyConfig,
-  className,
   applicationShortCuts,
 }) => {
   return (
-    <NativeSelect
+    <CommonSelect
       value={shortCutIndex(applicationShortCuts, keyConfig)}
-      onChange={(e) => onChange(keyConfigFromShortCut(applicationShortCuts, e.target.value))}
-      className={className}>
+      onChange={(e) => onChange(keyConfigFromShortCut(applicationShortCuts, e.target.value))}>
       <option value="" />
       {applicationShortCuts.map(({functionName}, index) => (
         <option key={index} value={index}>
           {functionName}
         </option>
       ))}
-    </NativeSelect>
+    </CommonSelect>
   );
 };
 
 interface KeySelectorProps {
   readonly onChange: (key: KeyConfig | undefined) => void;
   readonly keyConfig: KeyConfig | undefined;
-  readonly className: string;
 }
 
-export const KeySelector: React.FC<KeySelectorProps> = ({keyConfig, onChange, className}) => {
+export const KeySelector: React.FC<KeySelectorProps> = ({keyConfig, onChange}) => {
   return (
-    <NativeSelect
+    <CommonSelect
       value={keyConfig?.key || ''}
-      onChange={(e) => onChange(e.target.value ? {...keyConfig, key: Number(e.target.value)} : undefined)}
-      className={className}>
+      onChange={(e) => onChange(e.target.value ? {...keyConfig, key: Number(e.target.value)} : undefined)}>
       <option value="" />
       {keyCodes.map(([key, keyCode]) => (
         <option key={key} value={keyCode}>
           {key}
         </option>
       ))}
-    </NativeSelect>
+    </CommonSelect>
   );
 };
 
-const useStylesForSelectedCombinationButtonView = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    flexDirection: 'row',
-    marginTop: theme.spacing(2),
-  },
-  combinationLabel: {
-    color: theme.palette.text.secondary,
-    alignSelf: 'center',
-  },
-  chip: {
-    marginLeft: theme.spacing(1),
-  },
-  submitButton: {
-    marginLeft: theme.spacing(2),
-  },
-}));
+const RootBox = styled(Box)`
+  display: flex;
+  flex-direction: row;
+  margin-top: ${({theme}) => theme.spacing(2)};
+`;
+
+const CombinationLabel = styled(Typography)`
+  color: ${({theme}) => theme.palette.text.secondary};
+  align-self: center;
+`;
+
+const CombinationButtonChip = styled(Chip)`
+  margin-left: ${({theme}) => theme.spacing(1)};
+`;
+
+const SubmitButton = styled(Button)`
+  margin-left: ${({theme}) => theme.spacing(2)};
+`;
 
 interface SelectedCombinationButtonViewProps {
   readonly combinationButtons: readonly KeypadButton[];
@@ -126,54 +124,18 @@ export const SelectedCombinationButtonView: React.FC<SelectedCombinationButtonVi
   combinationButtons,
   onEdit,
 }) => {
-  const classes = useStylesForSelectedCombinationButtonView();
   return (
-    <Box className={classes.root}>
-      <Typography className={classes.combinationLabel}>組み合わせボタン :</Typography>
+    <RootBox>
+      <CombinationLabel>組み合わせボタン :</CombinationLabel>
       {combinationButtons.map(({name, label}) => (
-        <Chip key={name} label={label} className={classes.chip} />
+        <CombinationButtonChip key={name} label={label} />
       ))}
-      <Button variant="outlined" color="primary" onClick={onEdit} className={classes.submitButton}>
+      <SubmitButton variant="outlined" color="primary" onClick={onEdit}>
         編集
-      </Button>
-    </Box>
+      </SubmitButton>
+    </RootBox>
   );
 };
-
-const useStylesForKeypadNameView = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    flexDirection: 'row',
-    marginTop: theme.spacing(2),
-  },
-  label: {
-    color: theme.palette.text.secondary,
-  },
-  valueText: {
-    marginLeft: theme.spacing(1),
-    color: theme.palette.text.primary,
-  },
-}));
-
-interface KeypadNameViewProps {
-  readonly keypad: Keypad;
-}
-
-export const KeypadNameView: React.FC<KeypadNameViewProps> = ({keypad}) => {
-  const classes = useStylesForKeypadNameView();
-  return (
-    <Box className={classes.root}>
-      <Typography className={classes.label}>デバイス : </Typography>
-      <Typography className={classes.valueText}>{keypad.label}</Typography>
-    </Box>
-  );
-};
-
-const useStylesForKeySelectorCells = makeStyles((theme) => ({
-  select: {
-    minWidth: 70,
-  },
-}));
 
 interface KeySelectorCellsProps {
   readonly keyConfig: KeyConfig | undefined;
@@ -182,21 +144,19 @@ interface KeySelectorCellsProps {
 }
 
 export const KeySelectorCells: React.FC<KeySelectorCellsProps> = ({keyConfig, onChangeKey, applicationShortCuts}) => {
-  const classes = useStylesForKeySelectorCells();
   return (
     <>
       <TableCell align="center">
-        <ModifierKeySelector keyConfig={keyConfig} onChange={onChangeKey} className={classes.select} />
+        <ModifierKeySelector keyConfig={keyConfig} onChange={onChangeKey} />
       </TableCell>
       <TableCell align="center">
-        <KeySelector keyConfig={keyConfig} onChange={onChangeKey} className={classes.select} />
+        <KeySelector keyConfig={keyConfig} onChange={onChangeKey} />
       </TableCell>
       {applicationShortCuts && (
         <TableCell align="center">
           <ApplicationShortcutSelector
             keyConfig={keyConfig}
             onChange={onChangeKey}
-            className={classes.select}
             applicationShortCuts={applicationShortCuts}
           />
         </TableCell>

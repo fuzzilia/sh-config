@@ -18,28 +18,29 @@ import {keyCodeToKey} from '../models/KeyConfig';
 import {SHConfigManager} from '../models/SHConfigManager';
 import {JoyCon, JoyConInput, JoyConInputReportMode, leftJoyConButtons, rightJoyConButtons} from '../models/JoyCon';
 import Typography from '@mui/material/Typography';
-import makeStyles from '@mui/material/styles/makeStyles';
 import {Keypad} from '../models/keypads';
 import {rotateMotionLabelsByAxis} from './ButtonConfigRow';
 import {waitAsync} from '../models/utils';
 import {styled} from '@mui/material';
+import {KeyModifierIcon} from './KeyModifierIcon';
 
-const useStyles = makeStyles((theme) => ({
-  label: {
-    color: theme.palette.text.secondary,
-  },
-  buttonChip: {
-    marginLeft: theme.spacing(1),
-    marginTop: theme.spacing(1),
-  },
-  keyChip: {
-    marginRight: theme.spacing(1),
-    marginTop: theme.spacing(1),
-  },
-  row: {
-    marginBottom: theme.spacing(2),
-  },
-}));
+const RowGrid = styled(Grid)`
+  margin-bottom: ${({theme}) => theme.spacing(2)};
+`;
+
+const Label = styled(Typography)`
+  color: ${({theme}) => theme.palette.text.secondary};
+`;
+
+const ButtonChip = styled(Chip)`
+  margin-left: ${({theme}) => theme.spacing(1)};
+  margin-top: ${({theme}) => theme.spacing(1)};
+`;
+
+const KeyChip = styled(Chip)`
+  margin-right: ${({theme}) => theme.spacing(1)};
+  margin-top: ${({theme}) => theme.spacing(1)};
+`;
 
 export interface JoyConTestModalProps {
   readonly keypad: Keypad;
@@ -169,15 +170,14 @@ export const JoyConTestModal: React.FC<JoyConTestModalProps> = ({keypad, configS
       <DialogTitle>JoyConをブラウザで試す。</DialogTitle>
       <DialogContent>
         <Grid item xs={12}>
-          <Grid container spacing={2} className={classes.row}>
+          <RowGrid container spacing={2}>
             <Grid item xs={6}>
-              <Typography className={classes.label}>組み合わせボタン状態</Typography>
+              <Label>組み合わせボタン状態</Label>
               {configState.selectedCombinationButtonNames.map((buttonName, index) => {
                 const isActive = controllerState?.combination[index] ? 'secondary' : undefined;
                 return (
-                  <Chip
+                  <ButtonChip
                     key={buttonName}
-                    className={classes.buttonChip}
                     label={buttonLabelByName[buttonName] ?? 'Error!!!'}
                     color={isActive}
                     disabled={!isActive}
@@ -186,44 +186,35 @@ export const JoyConTestModal: React.FC<JoyConTestModalProps> = ({keypad, configS
               })}
             </Grid>
             <Grid item xs={6}>
-              <Typography className={classes.label}>ボタン押下状態</Typography>
+              <Label>ボタン押下状態</Label>
               {commandButtons.map((button) => {
                 const isActive = button.name === controllerState?.pushedButtonName ? 'secondary' : undefined;
-                return (
-                  <Chip
-                    key={button.name}
-                    className={classes.buttonChip}
-                    label={button.label}
-                    color={isActive}
-                    disabled={!isActive}
-                  />
-                );
+                return <KeyChip key={button.name} label={button.label} color={isActive} disabled={!isActive} />;
               })}
             </Grid>
-          </Grid>
-          <Grid container spacing={2} className={classes.row}>
+          </RowGrid>
+          <RowGrid container spacing={2}>
             {keypad.sticks.map((stick, index) => {
               return (
                 <Grid item xs={6}>
-                  <Typography className={classes.label}>{stick.label}</Typography>
+                  <Label>{stick.label}</Label>
                   <StickStateView key={index} stick={controllerState?.sticks[index]} />
                 </Grid>
               );
             })}
             <Grid item xs={6}>
-              <Typography className={classes.label}>モーション</Typography>
+              <Label>モーション</Label>
               <MotionSensorView motion={controllerState?.motion} />
             </Grid>
-          </Grid>
+          </RowGrid>
         </Grid>
         <Grid item spacing={2}>
-          <Typography className={classes.label}>入力キー</Typography>
+          <Label>入力キー</Label>
           {keys.map((key, index) => (
-            <Chip
+            <KeyChip
               key={index}
               icon={<KeyModifierIcon keyConfig={key} />}
               label={(key.key && keyCodeToKey.get(key.key)) || ''}
-              className={classes.keyChip}
               color={controllerState?.lastKeyIsAlive && index === keys.length - 1 ? 'primary' : undefined}
             />
           ))}
@@ -232,16 +223,6 @@ export const JoyConTestModal: React.FC<JoyConTestModalProps> = ({keypad, configS
     </Dialog>
   );
 };
-
-const useSubStyles = makeStyles((theme) => ({
-  label: {
-    color: theme.palette.text.secondary,
-    fontSize: 12,
-  },
-  root: {
-    height: 70,
-  },
-}));
 
 const SubLabel = styled(Typography)`
   color: ${({theme}) => theme.palette.text.secondary};
@@ -393,89 +374,5 @@ const MotionSensorView: React.FC<{motion: SHMotionState | undefined}> = ({motion
           </Grid>
         </Grid>
       );
-  }
-};
-
-const useKeyModifierIconStyles = makeStyles((theme) => ({
-  root: {
-    width: 24,
-    height: 24,
-    marginLeft: theme.spacing(2),
-  },
-  row: {
-    display: 'flex',
-    alignItems: 'center',
-  },
-  icon: {
-    width: 11,
-    height: 11,
-    marginBottom: 1,
-    marginRight: 1,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderColor: 'darkgray',
-    borderWidth: 1,
-    borderStyle: 'solid',
-  },
-  emptyIcon: {
-    width: 12,
-    height: 12,
-    marginBottom: 1,
-    marginRight: 1,
-    borderColor: 'darkgray',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    opacity: 0.3,
-  },
-  iconChar: {
-    fontSize: 16,
-    transform: 'scale(0.5)',
-  },
-}));
-
-const keyModifiers = ['shift', 'alt', 'ctrl', 'gui'] as const;
-
-const KeyModifierIcon: React.FC<{keyConfig: KeyConfig | undefined}> = ({keyConfig}) => {
-  const classes = useKeyModifierIconStyles();
-  if (keyModifiers.some((key) => keyConfig?.[key])) {
-    return (
-      <div className={classes.root}>
-        <div className={classes.row}>
-          {keyConfig?.shift ? (
-            <div className={classes.icon}>
-              <span className={classes.iconChar}>S</span>
-            </div>
-          ) : (
-            <div className={classes.emptyIcon} />
-          )}
-          {keyConfig?.ctrl ? (
-            <div className={classes.icon}>
-              <span className={classes.iconChar}>C</span>
-            </div>
-          ) : (
-            <div className={classes.emptyIcon} />
-          )}
-        </div>
-        <div className={classes.row}>
-          {keyConfig?.alt ? (
-            <div className={classes.icon}>
-              <span className={classes.iconChar}>A</span>
-            </div>
-          ) : (
-            <div className={classes.emptyIcon} />
-          )}
-          {keyConfig?.gui ? (
-            <div className={classes.icon}>
-              <span className={classes.iconChar}>G</span>
-            </div>
-          ) : (
-            <div className={classes.emptyIcon} />
-          )}
-        </div>
-      </div>
-    );
-  } else {
-    return null;
   }
 };

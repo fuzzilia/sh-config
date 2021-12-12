@@ -6,7 +6,6 @@ import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import {BreakableLabel} from './BreakableLabel';
 import NativeSelect from '@mui/material/NativeSelect';
-import makeStyles from '@mui/material/styles/makeStyles';
 import {KeySelectorCells} from './KeyConfigCommon';
 import {
   EightButtonDirection,
@@ -14,6 +13,7 @@ import {
   FourButtonDirection,
   fourButtonDirections,
 } from '../models/SHControllerManager';
+import {styled} from '@mui/material';
 
 export interface StickConfigRowProps {
   readonly config: SHStickConfig | undefined;
@@ -112,23 +112,20 @@ export const StickConfigRow: React.FC<StickConfigRowProps> = ({
   }
 };
 
-const useStylesForStickTypeSelector = makeStyles((theme) => ({
-  select: {
-    minWidth: 70,
-  },
-}));
+const StickTypeSelect = styled(NativeSelect)`
+  min-width: 70px;
+`;
 
 const StickTypeSelector: React.FC<{type: SHStickConfig['type']; onChange: (type: string) => void}> = ({
   type,
   onChange,
 }) => {
-  const classes = useStylesForStickTypeSelector();
   return (
-    <NativeSelect value={type ?? ''} className={classes.select} onChange={(e) => onChange(e.target.value)}>
+    <StickTypeSelect value={type ?? ''} onChange={(e) => onChange(e.target.value)}>
       <option value="rotate">回転</option>
       <option value="4-button">4方向ボタン</option>
       <option value="8-button">8方向ボタン</option>
-    </NativeSelect>
+    </StickTypeSelect>
   );
 };
 

@@ -5,7 +5,6 @@ import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import makeStyles from '@mui/material/styles/makeStyles';
 import {
   defaultSHMotionButtonConfig,
   getDefaultMotionConfigForType,
@@ -20,7 +19,6 @@ import {
 import {KeypadButton} from '../models/keypads';
 import {KeySelectorCells} from './KeyConfigCommon';
 import {BreakableLabel} from './BreakableLabel';
-import {css} from '@emotion/react';
 import {styled} from '@mui/material';
 
 interface ButtonConfigRowProps {

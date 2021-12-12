@@ -8,7 +8,6 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import makeStyles from '@mui/material/styles/makeStyles';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -16,6 +15,7 @@ import {ButtonConfigRow} from './ButtonConfigRow';
 import {SHButtonConfig, SHStickConfig} from '../models/SHConConfig';
 import {Keypad, KeypadButton} from '../models/keypads';
 import {StickConfigRow} from './StickConfigRow';
+import {styled} from '@mui/material';
 
 interface KeyConfigAccordionProps {
   readonly keypad: Keypad;
@@ -27,25 +27,26 @@ interface KeyConfigAccordionProps {
   readonly applicationShortCuts: readonly ApplicationShortCut[] | undefined;
 }
 
-const useStyles = makeStyles((theme) => ({
-  title: {
-    fontSize: theme.typography.pxToRem(15),
-    flexBasis: '20%',
-    flexShrink: 0,
-    alignSelf: 'center',
-  },
-  combinationLabel: {
-    fontSize: theme.typography.pxToRem(15),
-    color: theme.palette.text.secondary,
-    alignSelf: 'center',
-  },
-  chip: {
-    marginLeft: theme.spacing(1),
-  },
-  detail: {
-    overflowX: 'auto',
-  },
-}));
+const Title = styled(Typography)`
+  font-size: ${({theme}) => theme.typography.pxToRem(15)};
+  flex-basis: 20%;
+  flex-shrink: 0;
+  align-self: center;
+`;
+
+const CombinationLabel = styled(Typography)`
+  font-size: ${({theme}) => theme.typography.pxToRem(15)};
+  color: ${({theme}) => theme.palette.text.secondary};
+  align-self: center;
+`;
+
+const ButtonChip = styled(Chip)`
+  margin-left: ${({theme}) => theme.spacing(1)};
+`;
+
+const MainAccordionDetails = styled(AccordionDetails)`
+  overflow-x: auto;
+`;
 
 function replaceAt<T>(values: readonly (T | undefined)[], value: T, index: number): (T | undefined)[] {
   const copied = [...values];
@@ -58,7 +59,6 @@ function replaceAt<T>(values: readonly (T | undefined)[], value: T, index: numbe
 
 export const KeyConfigAccordion = React.memo<KeyConfigAccordionProps>(
   ({keypad, config, combinationButtons, combinationButtonStates, index, onChange, applicationShortCuts}) => {
-    const classes = useStyles();
     const changeButtonConfig = useCallback(
       (buttonIndex: number, buttonConfig: SHButtonConfig) => {
         onChange(index, (prevConfig) => ({
@@ -81,20 +81,19 @@ export const KeyConfigAccordion = React.memo<KeyConfigAccordionProps>(
     return (
       <Accordion defaultExpanded={index === 0}>
         <AccordionSummary expandIcon={<ExpandMore />}>
-          <Typography className={classes.title}>キー設定</Typography>
-          <Typography className={classes.combinationLabel}>組み合わせ : </Typography>
+          <Title>キー設定</Title>
+          <CombinationLabel>組み合わせ : </CombinationLabel>
           {combinationButtons.map((button, index) => (
-            <Chip
+            <ButtonChip
               key={button.name}
               label={button.label}
-              className={classes.chip}
               color={combinationButtonStates[index] ? 'secondary' : undefined}
               disabled={!combinationButtonStates[index]}
             />
             // <CombinationButtonStateView key={button.name} label={button.label} isOn={combinationButtonStates[index]} />
           ))}
         </AccordionSummary>
-        <AccordionDetails className={classes.detail}>
+        <MainAccordionDetails>
           <Table size="small">
             <TableHead>
               <TableRow>
@@ -129,7 +128,7 @@ export const KeyConfigAccordion = React.memo<KeyConfigAccordionProps>(
               ))}
             </TableBody>
           </Table>
-        </AccordionDetails>
+        </MainAccordionDetails>
       </Accordion>
     );
   },

@@ -1,6 +1,5 @@
 import React from 'react';
 import CardHeader from '@mui/material/CardHeader';
-import makeStyles from '@mui/material/styles/makeStyles';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import FormControl from '@mui/material/FormControl';
@@ -10,35 +9,32 @@ import {KeypadName, keypads} from '../models/keypads';
 import {SavedConfigsPanel} from './SavedConfigsPanel';
 import {KeyConfigState} from '../types';
 import {defaultKeyConfigsByKeypadName} from '../models/KeyConfig';
+import {styled} from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  card: {
-    margin: theme.spacing(2),
-    padding: theme.spacing(2),
-  },
-  description: {
-    alignSelf: 'flex-end',
-  },
-  form: {
-    marginLeft: theme.spacing(2),
-  },
-}));
+const RootBox = styled(Box)`
+  display: flex;
+  flex-direction: column;
+`;
+
+const MainCard = styled(Card)`
+  margin: ${({theme}) => theme.spacing(2)};
+  padding: ${({theme}) => theme.spacing(2)};
+`;
+
+const DeviceFormControl = styled(FormControl)`
+  margin-left: ${({theme}) => theme.spacing(2)};
+`;
 
 export interface SelectKeypadPanelProps {
   onChange(keyConfigState: KeyConfigState, combinationIsFixed: boolean): void;
 }
 
 export const SelectKeypadPanel: React.FC<SelectKeypadPanelProps> = ({onChange}) => {
-  const classes = useStyles();
   return (
-    <Box className={classes.root}>
-      <Card className={classes.card}>
+    <RootBox>
+      <MainCard>
         <CardHeader title="デバイスを選択して設定を作成" />
-        <FormControl className={classes.form}>
+        <DeviceFormControl>
           <InputLabel htmlFor="shortcut-type">デバイス</InputLabel>
           <NativeSelect
             onChange={(e) =>
@@ -59,13 +55,13 @@ export const SelectKeypadPanel: React.FC<SelectKeypadPanelProps> = ({onChange}) 
               </option>
             ))}
           </NativeSelect>
-        </FormControl>
-      </Card>
+        </DeviceFormControl>
+      </MainCard>
 
-      <Card className={classes.card}>
+      <MainCard>
         <CardHeader title="ブラウザに保存された設定をロード" />
         <SavedConfigsPanel onLoad={(config) => onChange(config, true)} />
-      </Card>
-    </Box>
+      </MainCard>
+    </RootBox>
   );
 };
