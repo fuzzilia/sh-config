@@ -7,7 +7,6 @@ import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
 import FormControl from '@mui/material/FormControl';
 import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
 import {
   applicationNames,
   applicationShortCutDefinitions,
@@ -27,12 +26,10 @@ import {SelectedCombinationButtonView} from './components/KeyConfigCommon';
 import {styled} from '@mui/material';
 import Button from '@mui/material/Button';
 import {saveConfig} from './models/ConfigStorage';
-import {JoyConTestModal} from './components/JoyConTestModal';
 import {keyConfigStateToSHConfig, setConfigForCombinationForKeyConfigState} from './models/SHConConfig';
 import {encodeSHConfig} from './models/SHConfigEncoder';
-import {decodeSHConfig} from './models/SHConfigDecoder';
-import {KeyConfigService} from './models/KeyConfigService';
-import {PairingModal} from './components/PairingModal';
+import {FormLabel, FormOptionButton, FormRowBox, FormTextField, FormValueText} from './components/FormCommon';
+import {DeviceFormRow} from './components/DeviceFormRow';
 
 const MainContentBox = styled(Box)`
   display: flex;
@@ -48,29 +45,6 @@ const TypeConfigCardContent = styled(Box)`
   margin-right: ${({theme}) => theme.spacing(2)};
   display: flex;
   flex-direction: column;
-`;
-
-const FormRowBox = styled(Box)`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-`;
-
-const FormLabel = styled(Typography)`
-  color: ${({theme}) => theme.palette.text.secondary};
-`;
-
-const FormValueText = styled(Typography)`
-  margin-left: ${({theme}) => theme.spacing(1)};
-  color: ${({theme}) => theme.palette.text.primary};
-`;
-
-const FormOptionButton = styled(Button)`
-  margin-left: ${({theme}) => theme.spacing(2)};
-`;
-
-const FormTextField = styled(TextField)`
-  margin-left: ${({theme}) => theme.spacing(2)};
 `;
 
 const KeyConfigArea = styled(Box)`
@@ -96,14 +70,11 @@ const OsFormControl = styled(FormControl)`
 `;
 
 export const App: React.FC = () => {
-  const keyConfigServiceRef = useRef<KeyConfigService>();
   const [configState, setConfigState] = useState<KeyConfigState | undefined>(undefined);
   const [lastSavedConfig, setLastSavedConfig] = useState<KeyConfigState | undefined>(undefined);
   const [combinationIsFixed, setCombinationIsFixed] = useState<boolean>(false);
   const [osType, setOsType] = useState<OsType | undefined>(undefined);
   const [application, setApplication] = useState<string | undefined>(undefined);
-  const [testModalIsOpen, setTestModalIsOpen] = useState<boolean>(false);
-  const [pairingModelIsOpen, setPairingModalIsOpen] = useState<boolean>(false);
   const selectedKeypad: Keypad | undefined =
     configState && keypads.find((keypad) => keypad.name === configState.selectedKeypad);
   const combinationButtonCount = configState ? configState.selectedCombinationButtonNames.length : 0;
@@ -168,45 +139,6 @@ export const App: React.FC = () => {
       setCombinationIsFixed(false);
     }
   };
-  const openTestModal = useCallback(() => setTestModalIsOpen(true), []);
-  const closeTestModal = useCallback(() => setTestModalIsOpen(false), []);
-  const closePairingModal = useCallback(() => setPairingModalIsOpen(false), []);
-
-  const connect = useCallback(async () => {
-    if (!keyConfigServiceRef.current) {
-      try {
-        if (!navigator.bluetooth) {
-          alert('WebBLE未対応のブラウザです。');
-          return;
-        }
-        const service = await KeyConfigService.connect(navigator.bluetooth);
-        if (!service) {
-          return;
-        }
-        keyConfigServiceRef.current = service;
-      } catch (error) {
-        console.error(error);
-        alert(error?.message ?? '不明なエラーが発生しました。');
-      }
-    }
-  }, []);
-  const writeConfig = useCallback(async () => {
-    if (!keyConfigServiceRef.current) {
-      alert('未接続です。');
-      return;
-    }
-    if (!configState) {
-      alert('設定がありません。');
-      return;
-    }
-    try {
-      await keyConfigServiceRef.current.writeConfig(keyConfigStateToSHConfig(configState));
-    } catch (error) {
-      console.error(error);
-      alert(error?.message ?? '不明なエラーが発生しました。');
-    }
-  }, [configState]);
-  const scan = useCallback(() => setPairingModalIsOpen(true), []);
 
   let dataSize = 0;
   if (configState?.selectedKeypad) {
@@ -281,22 +213,7 @@ export const App: React.FC = () => {
                     <FormLabel>データサイズ : </FormLabel>
                     <FormValueText>{dataSize}</FormValueText>
                   </FormRowBox>
-                  <FormRowBox>
-                    <FormLabel>デバイス : </FormLabel>
-                    <FormValueText>{selectedKeypad.label}</FormValueText>
-                    <FormOptionButton variant="outlined" color="primary" onClick={openTestModal}>
-                      ブラウザで試す
-                    </FormOptionButton>
-                    <FormOptionButton variant="outlined" color="primary" onClick={connect}>
-                      接続
-                    </FormOptionButton>
-                    <FormOptionButton variant="outlined" color="primary" onClick={writeConfig}>
-                      書き込み
-                    </FormOptionButton>
-                    <FormOptionButton variant="outlined" color="primary" onClick={scan}>
-                      ペアリング
-                    </FormOptionButton>
-                  </FormRowBox>
+                  <DeviceFormRow keypad={selectedKeypad} configState={configState} />
                   <SelectedCombinationButtonView
                     combinationButtons={combinationButtons}
                     onEdit={() => setCombinationIsFixed(false)}
@@ -353,17 +270,6 @@ export const App: React.FC = () => {
                   />
                 ))}
               </KeyConfigArea>
-              <JoyConTestModal
-                keypad={selectedKeypad}
-                onClose={closeTestModal}
-                isOpen={testModalIsOpen}
-                configState={configState}
-              />
-              <PairingModal
-                keyConfigServiceRef={keyConfigServiceRef}
-                onClose={closePairingModal}
-                isOpen={pairingModelIsOpen}
-              />
             </MainContentBox>
           ) : (
             <SelectCombinationButtonPanel
