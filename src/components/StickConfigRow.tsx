@@ -2,11 +2,11 @@ import React from 'react';
 import {KeyConfig, SHStickConfig} from '../models/SHConConfig';
 import {KeypadStick} from '../models/keypads';
 import {ApplicationShortCut} from '../types';
-import TableCell from '@material-ui/core/TableCell';
-import TableRow from '@material-ui/core/TableRow';
+import TableCell from '@mui/material/TableCell';
+import TableRow from '@mui/material/TableRow';
 import {BreakableLabel} from './BreakableLabel';
-import NativeSelect from '@material-ui/core/NativeSelect';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import NativeSelect from '@mui/material/NativeSelect';
+import makeStyles from '@mui/material/styles/makeStyles';
 import {KeySelectorCells} from './KeyConfigCommon';
 import {
   EightButtonDirection,

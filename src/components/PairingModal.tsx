@@ -1,12 +1,12 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {BluetoothDeviceScanResult, FoundBluetoothDevice, KeyConfigService} from '../models/KeyConfigService';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Dialog from '@material-ui/core/Dialog';
-import Grid from '@material-ui/core/Grid';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Dialog from '@mui/material/Dialog';
+import Grid from '@mui/material/Grid';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import DialogContent from '@mui/material/DialogContent';
 
 export interface PairingModalProps {
   readonly keyConfigServiceRef: React.MutableRefObject<KeyConfigService | undefined>;

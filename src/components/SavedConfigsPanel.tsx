@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import {ConfigStorageIndex, deleteConfig, loadConfig, loadConfigIndexes} from '../models/ConfigStorage';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import IconButton from '@material-ui/core/IconButton';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import DeleteIcon from '@material-ui/icons/Delete';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import IconButton from '@mui/material/IconButton';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
+import DeleteIcon from '@mui/icons-material/Delete';
 import {KeyConfigState} from '../types';
 import {shConfigToKeyConfigState} from '../models/SHConConfig';
 

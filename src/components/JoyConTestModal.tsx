@@ -1,10 +1,10 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
-import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import Chip from '@material-ui/core/Chip';
-import Grid from '@material-ui/core/Grid';
-import ArrowUpward from '@material-ui/icons/ArrowUpward';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import Chip from '@mui/material/Chip';
+import Grid from '@mui/material/Grid';
+import ArrowUpward from '@mui/icons-material/ArrowUpward';
 import {
   EightButtonDirection,
   SHControllerManager,
@@ -17,11 +17,12 @@ import {KeyConfigState} from '../types';
 import {keyCodeToKey} from '../models/KeyConfig';
 import {SHConfigManager} from '../models/SHConfigManager';
 import {JoyCon, JoyConInput, JoyConInputReportMode, leftJoyConButtons, rightJoyConButtons} from '../models/JoyCon';
-import Typography from '@material-ui/core/Typography';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import Typography from '@mui/material/Typography';
+import makeStyles from '@mui/material/styles/makeStyles';
 import {Keypad} from '../models/keypads';
 import {rotateMotionLabelsByAxis} from './ButtonConfigRow';
 import {waitAsync} from '../models/utils';
+import {styled} from '@mui/material';
 
 const useStyles = makeStyles((theme) => ({
   label: {
@@ -48,7 +49,6 @@ export interface JoyConTestModalProps {
 }
 
 export const JoyConTestModal: React.FC<JoyConTestModalProps> = ({keypad, configState, onClose, isOpen}) => {
-  const classes = useStyles();
   const [controllerState, setControllerState] = useState<SHControllerState | undefined>();
   const lastStateJsonRef = useRef<string>('');
   const connectedDevice = useRef<HIDDevice>();
@@ -243,57 +243,65 @@ const useSubStyles = makeStyles((theme) => ({
   },
 }));
 
+const SubLabel = styled(Typography)`
+  color: ${({theme}) => theme.palette.text.secondary};
+  font-size: 12px;
+`;
+
+const StickStateRoot = styled(Grid)`
+  height: 70px;
+`;
+
 const StickStateView: React.FC<{stick: SHStickState | undefined}> = ({stick}) => {
-  const classes = useSubStyles();
   if (!stick) {
     return (
-      <Grid container spacing={2} className={classes.root}>
+      <StickStateRoot container spacing={2}>
         <Grid item xs={3}>
-          <Typography className={classes.label}>モード</Typography>
+          <SubLabel>モード</SubLabel>
           <Typography>無効</Typography>
         </Grid>
-      </Grid>
+      </StickStateRoot>
     );
   }
   switch (stick.type) {
     case '4-button':
       return (
-        <Grid container spacing={2} className={classes.root}>
+        <StickStateRoot container spacing={2}>
           <Grid item xs={3}>
-            <Typography className={classes.label}>モード</Typography>
+            <SubLabel>モード</SubLabel>
             <Typography>4方向キー</Typography>
           </Grid>
           <Grid item xs={3}>
-            <Typography className={classes.label}>入力方向</Typography>
+            <SubLabel>入力方向</SubLabel>
             <DirectionIcon direction={stick.direction} />
           </Grid>
-        </Grid>
+        </StickStateRoot>
       );
     case '8-button':
       return (
-        <Grid container spacing={2} className={classes.root}>
+        <StickStateRoot container spacing={2}>
           <Grid item xs={3}>
-            <Typography className={classes.label}>モード</Typography>
+            <SubLabel>モード</SubLabel>
             <Typography>8方向キー</Typography>
           </Grid>
           <Grid item xs={3}>
-            <Typography className={classes.label}>入力方向</Typography>
+            <SubLabel>入力方向</SubLabel>
             <DirectionIcon direction={stick.direction} />
           </Grid>
-        </Grid>
+        </StickStateRoot>
       );
     case 'rotate':
       return (
-        <Grid container spacing={2} className={classes.root}>
+        <StickStateRoot container spacing={2}>
           <Grid item xs={3}>
-            <Typography className={classes.label}>モード</Typography>
+            <SubLabel>モード</SubLabel>
             <Typography>回転</Typography>
           </Grid>
           <Grid item xs={3}>
-            <Typography className={classes.label}>回転数</Typography>
+            <SubLabel>回転数</SubLabel>
             <Typography>{stick.rotationCount}</Typography>
           </Grid>
-        </Grid>
+        </StickStateRoot>
       );
   }
 };
@@ -331,17 +339,16 @@ const DirectionIcon: React.FC<{readonly direction: EightButtonDirection | undefi
 };
 
 const MotionSensorView: React.FC<{motion: SHMotionState | undefined}> = ({motion}) => {
-  const classes = useSubStyles();
   switch (motion?.type) {
     case 'gesture':
       return (
         <Grid container spacing={2}>
           <Grid item xs={3}>
-            <Typography className={classes.label}>モード</Typography>
+            <SubLabel>モード</SubLabel>
             <Typography>モーション</Typography>
           </Grid>
           <Grid item xs={3}>
-            <Typography className={classes.label}>方向</Typography>
+            <SubLabel>方向</SubLabel>
             <Typography>
               {motion?.firstGesture
                 ? rotateMotionLabelsByAxis[motion.firstGesture.axis][
@@ -356,23 +363,23 @@ const MotionSensorView: React.FC<{motion: SHMotionState | undefined}> = ({motion
       return (
         <Grid container spacing={2}>
           <Grid item xs={3}>
-            <Typography className={classes.label}>モード</Typography>
+            <SubLabel>モード</SubLabel>
             <Typography>回転</Typography>
           </Grid>
           <Grid item xs={3}>
-            <Typography className={classes.label}>ロック</Typography>
+            <SubLabel>ロック</SubLabel>
             <Typography>{motion.lockedAxis ? rotateMotionLabelsByAxis[motion.lockedAxis].axis : ''}</Typography>
           </Grid>
           <Grid item xs={2}>
-            <Typography className={classes.label}>ひねり方向</Typography>
+            <SubLabel>ひねり方向</SubLabel>
             <Typography>{motion.rotationState.x.count}</Typography>
           </Grid>
           <Grid item xs={2}>
-            <Typography className={classes.label}>前後転</Typography>
+            <SubLabel>前後転</SubLabel>
             <Typography>{motion.rotationState.y.count}</Typography>
           </Grid>
           <Grid item xs={2}>
-            <Typography className={classes.label}>水平</Typography>
+            <SubLabel>水平</SubLabel>
             <Typography>{motion.rotationState.z.count}</Typography>
           </Grid>
         </Grid>
@@ -381,7 +388,7 @@ const MotionSensorView: React.FC<{motion: SHMotionState | undefined}> = ({motion
       return (
         <Grid container spacing={2}>
           <Grid item xs={3}>
-            <Typography className={classes.label}>モード</Typography>
+            <Typography>モード</Typography>
             <Typography>無効</Typography>
           </Grid>
         </Grid>

@@ -1,11 +1,11 @@
 import React, {ChangeEvent} from 'react';
 import {ApplicationShortCut} from '../types';
-import NativeSelect from '@material-ui/core/NativeSelect';
-import TableCell from '@material-ui/core/TableCell';
-import TableRow from '@material-ui/core/TableRow';
-import Checkbox from '@material-ui/core/Checkbox';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import NativeSelect from '@mui/material/NativeSelect';
+import TableCell from '@mui/material/TableCell';
+import TableRow from '@mui/material/TableRow';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import makeStyles from '@mui/material/styles/makeStyles';
 import {
   defaultSHMotionButtonConfig,
   getDefaultMotionConfigForType,
@@ -20,18 +20,8 @@ import {
 import {KeypadButton} from '../models/keypads';
 import {KeySelectorCells} from './KeyConfigCommon';
 import {BreakableLabel} from './BreakableLabel';
-
-const useStyles = makeStyles((theme) => ({
-  keyInput: {
-    minWidth: 70,
-  },
-  nestedCell: {
-    paddingLeft: theme.spacing(6),
-  },
-  splitCountInput: {
-    marginLeft: theme.spacing(2),
-  },
-}));
+import {css} from '@emotion/react';
+import {styled} from '@mui/material';
 
 interface ButtonConfigRowProps {
   readonly config: SHButtonConfig | undefined;
@@ -140,42 +130,33 @@ export const ButtonConfigRow = React.memo<ButtonConfigRowProps>(
   },
 );
 
-const useStylesForOperationTypeSelector = makeStyles((theme) => ({
-  select: {
-    minWidth: 70,
-  },
-}));
+const SelectForOperationType = styled(NativeSelect)`
+  min-width: 70px;
+`;
 
 const OperationTypeSelector: React.FC<{type: 'motion' | undefined; onChange: (type: string) => void}> = ({
   type,
   onChange,
 }) => {
-  const classes = useStylesForOperationTypeSelector();
   return (
-    <NativeSelect value={type ?? ''} className={classes.select} onChange={(e) => onChange(e.target.value)}>
+    <SelectForOperationType value={type ?? ''} onChange={(e) => onChange(e.target.value)}>
       <option value="">押下</option>
       <option value="motion">モーション</option>
-    </NativeSelect>
+    </SelectForOperationType>
   );
 };
 
-const useStylesForMotionTypeSelector = makeStyles((theme) => ({
-  select: {
-    minWidth: 70,
-  },
-}));
+const SelectForMotionType = styled(NativeSelect)`
+  min-width: 70px;
+`;
 
 const MotionTypeSelector: React.FC<{type: SHMotionConfig['type']; onChange: (motion: SHMotionConfig['type']) => void}> =
   ({type, onChange}) => {
-    const classes = useStylesForMotionTypeSelector();
     return (
-      <NativeSelect
-        value={type ?? ''}
-        className={classes.select}
-        onChange={(e) => onChange(e.target.value as SHMotionConfig['type'])}>
+      <SelectForMotionType value={type ?? ''} onChange={(e) => onChange(e.target.value as SHMotionConfig['type'])}>
         <option value="rotate">回転</option>
         <option value="gesture">ジェスチャ</option>
-      </NativeSelect>
+      </SelectForMotionType>
     );
   };
 
@@ -233,6 +214,14 @@ interface RotateMotionKeyConfigAdditionalRowsForAxisProps {
   ): void;
 }
 
+const NestedCell = styled(TableCell)`
+  padding-left: ${({theme}) => theme.spacing(6)};
+`;
+
+const SplitCountInput = styled(NativeSelect)`
+  margin-left: ${({theme}) => theme.spacing(2)};
+`;
+
 const RotateMotionKeyConfigAdditionalRowsForAxis: React.FC<RotateMotionKeyConfigAdditionalRowsForAxisProps> = ({
   axis,
   splitCount,
@@ -242,8 +231,6 @@ const RotateMotionKeyConfigAdditionalRowsForAxis: React.FC<RotateMotionKeyConfig
   onSplitSizeChanged,
   onKeyChanged,
 }) => {
-  // TODO useStylesの分割
-  const classes = useStyles();
   const changeSplitSize = (e: ChangeEvent<HTMLSelectElement>) => onSplitSizeChanged(axis, Number(e.target.value));
   return (
     <>
@@ -251,18 +238,18 @@ const RotateMotionKeyConfigAdditionalRowsForAxis: React.FC<RotateMotionKeyConfig
         <TableCell>{labels.axis}</TableCell>
         <TableCell>
           分割数
-          <NativeSelect value={splitCount} className={classes.splitCountInput} onChange={changeSplitSize}>
+          <SplitCountInput value={splitCount} onChange={changeSplitSize}>
             {rotateSplitCounts.map((count) => (
               <option key={count} value={count}>
                 {count}
               </option>
             ))}
-          </NativeSelect>
+          </SplitCountInput>
         </TableCell>
         <TableCell colSpan={3} />
       </TableRow>
       <TableRow>
-        <TableCell className={classes.nestedCell}>{labels.positiveDirection}</TableCell>
+        <NestedCell>{labels.positiveDirection}</NestedCell>
         <KeySelectorCells
           keyConfig={config?.positive}
           onChangeKey={(key) => onKeyChanged(axis, 'positive', key)}
@@ -270,7 +257,7 @@ const RotateMotionKeyConfigAdditionalRowsForAxis: React.FC<RotateMotionKeyConfig
         />
       </TableRow>
       <TableRow>
-        <TableCell className={classes.nestedCell}>{labels.negativeDirection}</TableCell>
+        <NestedCell>{labels.negativeDirection}</NestedCell>
         <KeySelectorCells
           keyConfig={config?.negative}
           onChangeKey={(key) => onKeyChanged(axis, 'negative', key)}

@@ -1,16 +1,16 @@
 import React from 'react';
-import NativeSelect from '@material-ui/core/NativeSelect';
+import NativeSelect from '@mui/material/NativeSelect';
 import {modifierFromStringValue, modifierKeyOptions, modifierKeyToStringValue} from '../models/ModifierKeys';
 import {KeyConfig} from '../models/SHConConfig';
 import {ApplicationShortCut} from '../types';
 import {isEqualShortCut, keyCodes} from '../models/KeyConfig';
 import {Keypad, KeypadButton} from '../models/keypads';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import Chip from '@material-ui/core/Chip';
-import Button from '@material-ui/core/Button';
-import TableCell from '@material-ui/core/TableCell';
+import makeStyles from '@mui/material/styles/makeStyles';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Chip from '@mui/material/Chip';
+import Button from '@mui/material/Button';
+import TableCell from '@mui/material/TableCell';
 
 export interface ModifierKeySelectorProps {
   readonly onChange: (key: KeyConfig | undefined) => void;
