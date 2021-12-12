@@ -9,26 +9,26 @@ import ListItemText from '@mui/material/ListItemText';
 import DialogContent from '@mui/material/DialogContent';
 
 export interface PairingModalProps {
-  readonly keyConfigServiceRef: React.MutableRefObject<KeyConfigService | undefined>;
+  readonly keyConfigService: KeyConfigService | undefined;
   readonly onClose: () => void;
   readonly isOpen: boolean;
 }
 
-export const PairingModal: React.FC<PairingModalProps> = ({keyConfigServiceRef, onClose, isOpen}) => {
+export const PairingModal: React.FC<PairingModalProps> = ({keyConfigService, onClose, isOpen}) => {
   const [scanResult, setScanResult] = useState<BluetoothDeviceScanResult>();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       (async () => {
-        if (!keyConfigServiceRef.current) {
+        if (!keyConfigService) {
           alert('未接続です。');
           onClose();
           return;
         }
         try {
           setIsLoading(true);
-          const result = await keyConfigServiceRef.current.scan();
+          const result = await keyConfigService.scan();
           console.log('scan result', result);
           setScanResult(result);
         } catch (error) {
@@ -39,17 +39,20 @@ export const PairingModal: React.FC<PairingModalProps> = ({keyConfigServiceRef, 
         }
       })();
     }
-  }, [isOpen]);
+  }, [isOpen, keyConfigService]);
 
-  const onSelectDevice = useCallback(async (id: number, index: number, device: FoundBluetoothDevice) => {
-    if (!keyConfigServiceRef.current) {
-      alert('未接続です。');
+  const onSelectDevice = useCallback(
+    async (id: number, index: number, device: FoundBluetoothDevice) => {
+      if (!keyConfigService) {
+        alert('未接続です。');
+        onClose();
+        return;
+      }
+      await keyConfigService.connect(id, index, device);
       onClose();
-      return;
-    }
-    await keyConfigServiceRef.current.connect(id, index, device);
-    onClose();
-  }, []);
+    },
+    [keyConfigService],
+  );
 
   return (
     <Dialog open={isOpen} onClose={onClose} fullWidth={true} maxWidth="md">

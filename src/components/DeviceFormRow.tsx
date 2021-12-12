@@ -1,4 +1,4 @@
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {FormLabel, FormOptionButton, FormRowBox, FormValueText} from './FormCommon';
 import {isJoycon, Keypad} from '../models/keypads';
 import {PairingModal} from './PairingModal';
@@ -14,6 +14,8 @@ interface DeviceFormRowProps {
 
 export const DeviceFormRow: React.FC<DeviceFormRowProps> = ({keypad, configState}) => {
   const [keyConfigService, setKeyConfigService] = useState<KeyConfigService>();
+  const keyConfigServiceRef = useRef<KeyConfigService | undefined>();
+  keyConfigServiceRef.current = keyConfigService;
   const [testModalIsOpen, setTestModalIsOpen] = useState<boolean>(false);
   const [pairingModelIsOpen, setPairingModalIsOpen] = useState<boolean>(false);
   const closeTestModal = useCallback(() => setTestModalIsOpen(false), []);
@@ -26,7 +28,9 @@ export const DeviceFormRow: React.FC<DeviceFormRowProps> = ({keypad, configState
           alert('WebBLE未対応のブラウザです。');
           return;
         }
-        const service = await KeyConfigService.connect(navigator.bluetooth);
+        const service = await KeyConfigService.connect(navigator.bluetooth, () => {
+          setKeyConfigService(undefined);
+        });
         if (!service) {
           return;
         }
@@ -53,7 +57,9 @@ export const DeviceFormRow: React.FC<DeviceFormRowProps> = ({keypad, configState
       alert(error?.message ?? '不明なエラーが発生しました。');
     }
   }, [configState, keyConfigService]);
+  const disconnect = useCallback(() => keyConfigService?.disconnect(), [keyConfigService]);
   const scan = useCallback(() => setPairingModalIsOpen(true), []);
+  useEffect(() => () => keyConfigServiceRef.current?.disconnect(), []);
 
   return (
     <FormRowBox>
@@ -64,17 +70,27 @@ export const DeviceFormRow: React.FC<DeviceFormRowProps> = ({keypad, configState
           ブラウザで試す
         </FormOptionButton>
       )}
-      <FormOptionButton variant="outlined" color="primary" onClick={connect}>
-        接続
-      </FormOptionButton>
-      <FormOptionButton variant="outlined" color="primary" onClick={writeConfig}>
-        書き込み
-      </FormOptionButton>
-      <FormOptionButton variant="outlined" color="primary" onClick={scan}>
-        ペアリング
-      </FormOptionButton>
+      {keyConfigService ? (
+        <>
+          <FormOptionButton variant="outlined" color="primary" onClick={writeConfig}>
+            書き込み
+          </FormOptionButton>
+          <FormOptionButton variant="outlined" color="primary" onClick={scan}>
+            ペアリング
+          </FormOptionButton>
+          <FormOptionButton variant="outlined" color="secondary" onClick={disconnect}>
+            切断
+          </FormOptionButton>
+        </>
+      ) : (
+        <>
+          <FormOptionButton variant="outlined" color="primary" onClick={connect}>
+            接続
+          </FormOptionButton>
+        </>
+      )}
       <JoyConTestModal keypad={keypad} onClose={closeTestModal} isOpen={testModalIsOpen} configState={configState} />
-      <PairingModal keyConfigServiceRef={keyConfigService} onClose={closePairingModal} isOpen={pairingModelIsOpen} />
+      <PairingModal keyConfigService={keyConfigService} onClose={closePairingModal} isOpen={pairingModelIsOpen} />
     </FormRowBox>
   );
 };

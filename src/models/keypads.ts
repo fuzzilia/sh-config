@@ -89,3 +89,7 @@ export const keypads = [keypadShControllerV1, keypadJoyConL, keypadJoyConR];
 
 export type KeypadName = typeof keypads[number]['name'];
 export type KeypadButtons = typeof keypads[number]['buttons'];
+
+export function isJoycon(keypad: Keypad): boolean {
+  return keypad.id === keypadJoyConL.id || keypad.id === keypadJoyConL.id;
+}

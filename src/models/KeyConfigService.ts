@@ -44,7 +44,7 @@ function parsedFoundDevices(data: DataView): BluetoothDeviceScanResult {
 }
 
 export class KeyConfigService {
-  public static async connect(bluetooth: Bluetooth): Promise<KeyConfigService | undefined> {
+  public static async connect(bluetooth: Bluetooth, onClose: () => void): Promise<KeyConfigService | undefined> {
     let device: BluetoothDevice;
     let gattServer: BluetoothRemoteGATTServer;
     let service: BluetoothRemoteGATTService;
@@ -96,7 +96,7 @@ export class KeyConfigService {
     } catch (error) {
       throw new Error(`デバイスとの通信設定処理に失敗しました。 ${error}`);
     }
-    return new KeyConfigService(device, gattServer, service, {config, scanningActive, foundDevices, connect});
+    return new KeyConfigService(device, gattServer, service, {config, scanningActive, foundDevices, connect}, onClose);
   }
 
   private resolveScanningEnd?: () => void;
@@ -107,12 +107,13 @@ export class KeyConfigService {
     private gattServer: BluetoothRemoteGATTServer,
     private service: BluetoothRemoteGATTService,
     private characteristics: Record<CharacteristicName, BluetoothRemoteGATTCharacteristic>,
+    onClose: () => void,
   ) {
     device.addEventListener('gattserverdisconnected', () => {
-      console.log('xxxx gattserverdisconnected');
       this.rejectScanningEnd?.(new Error('デバイスが切断されました。'));
       this.resolveScanningEnd = undefined;
       this.rejectScanningEnd = undefined;
+      onClose();
     });
     characteristics.scanningActive.addEventListener('characteristicvaluechanged', async (event) => {
       if (this.resolveScanningEnd) {
@@ -161,5 +162,9 @@ export class KeyConfigService {
   public async writeConfig(config: SHConConfig): Promise<void> {
     const encoded = encodeSHConfig(keypads, config);
     await this.characteristics.config.writeValue(encoded);
+  }
+
+  public disconnect(): void {
+    this.gattServer.disconnect();
   }
 }
