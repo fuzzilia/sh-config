@@ -1,190 +1,287 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import './App.css';
-import {
-  AppBar,
-  Box,
-  Button,
-  Card,
-  CardHeader,
-  Checkbox,
-  Container,
-  CssBaseline,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
-  FormLabel,
-  makeStyles,
-  Typography
-} from '@material-ui/core';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import Container from '@mui/material/Container';
+import CssBaseline from '@mui/material/CssBaseline';
+import FormControl from '@mui/material/FormControl';
+import Typography from '@mui/material/Typography';
 import {
   applicationNames,
-  applicationShortCutDefinitions, applicationShortcutsForOs,
-  buildDefaultKeyConfigsForCombinationButtons,
-  defaultCombinationButtons,
-  defaultKeyConfigs,
-  MaxCombinationButtonCount
+  applicationShortCutDefinitions,
+  applicationShortcutsForOs,
+  changeSelectedCombinationButton,
+  combinationButtonCountToCombinationCount,
+  makeCombinations,
 } from './models/KeyConfig';
-import { ApplicationShortCut, KeyConfig, KeyConfigsByCombinationButtonState, OsType } from './types';
-import { writeKeyConfig } from './models/writeKeyConfig';
-import { KeyConfigExpansionPanel } from './components/KeyConfigExpansionPanel';
-import InputLabel from '@material-ui/core/InputLabel';
-import NativeSelect from '@material-ui/core/NativeSelect';
+import {ApplicationShortCut, KeyConfigByCombination, KeyConfigState, OsType, SetterFunc} from './types';
+import {KeyConfigAccordion} from './components/KeyConfigAccordion';
+import InputLabel from '@mui/material/InputLabel';
+import NativeSelect from '@mui/material/NativeSelect';
+import {Keypad, keypads} from './models/keypads';
+import {SelectKeypadPanel} from './components/SelectKeypadPanel';
+import {SelectCombinationButtonPanel} from './components/SelectCombinationButtonPanel';
+import {SelectedCombinationButtonView} from './components/KeyConfigCommon';
+import {styled} from '@mui/material';
+import Button from '@mui/material/Button';
+import {saveConfig} from './models/ConfigStorage';
+import {keyConfigStateToSHConfig, setConfigForCombinationForKeyConfigState} from './models/SHConConfig';
+import {encodeSHConfig} from './models/SHConfigEncoder';
+import {FormLabel, FormOptionButton, FormRowBox, FormTextField, FormValueText} from './components/FormCommon';
+import {DeviceFormRow} from './components/DeviceFormRow';
 
-function replaceAt<T>(values: readonly T[], newValue: T, at: number): T[] {
-  const newValues = [...values];
-  newValues[at] = newValue;
-  return newValues;
-}
+const MainContentBox = styled(Box)`
+  display: flex;
+  flex-direction: column;
+`;
 
-const useStyles = makeStyles(theme => ({
-  root: {
-  },
-  title: {
-    flexGrow: 1,
-    height: 40,
-  },
-  typeConfigCard: {
-    margin: theme.spacing(2),
-  },
-  osSelect: {
-    margin: theme.spacing(2),
-    width: 80
-  },
-  shortcutTypeControl: {
-    margin: theme.spacing(2),
-    width: 180
-  },
-  headerForm: {
-    margin: theme.spacing(2),
-  },
-  keyConfigCard: {
-    margin: theme.spacing(2),
-  },
-  keyConfigArea: {
-    margin: theme.spacing(2),
-  },
-  checkboxGroup: {
-    flexDirection: 'row'
-  },
-  submitButton: {
-    margin: theme.spacing(2),
-    alignSelf: 'flex-end',
-  },
-}));
+const TypeConfigCard = styled(Card)`
+  margin: ${({theme}) => theme.spacing(2)};
+`;
 
-const App: React.FC = () => {
-  const classes = useStyles();
-  const [keyConfigs, setKeyConfigs] = useState<readonly Readonly<KeyConfigsByCombinationButtonState>[]>(defaultKeyConfigs);
-  const [combinationButtons, setCombinationButtons] = useState<boolean[]>(defaultCombinationButtons);
+const TypeConfigCardContent = styled(Box)`
+  margin-left: ${({theme}) => theme.spacing(2)};
+  margin-right: ${({theme}) => theme.spacing(2)};
+  display: flex;
+  flex-direction: column;
+`;
+
+const KeyConfigArea = styled(Box)`
+  margin: ${({theme}) => theme.spacing(2)};
+`;
+
+const Title = styled(Typography)`
+  flex-grow: 1;
+  height: 40px;
+`;
+
+const AppBarContent = styled(Box)`
+  display: flex;
+  align-items: center;
+`;
+
+const ShortCutTypeFormControl = styled(FormControl)`
+  width: 180px;
+`;
+
+const OsFormControl = styled(FormControl)`
+  width: 80px;
+`;
+
+export const App: React.FC = () => {
+  const [configState, setConfigState] = useState<KeyConfigState | undefined>(undefined);
+  const [lastSavedConfig, setLastSavedConfig] = useState<KeyConfigState | undefined>(undefined);
+  const [combinationIsFixed, setCombinationIsFixed] = useState<boolean>(false);
   const [osType, setOsType] = useState<OsType | undefined>(undefined);
   const [application, setApplication] = useState<string | undefined>(undefined);
-  const onChange = useCallback((combinationIndex: number, configIndex: number, keyConfig: KeyConfig) => {
-    setKeyConfigs((prevKeyConfigs) => {
-      const nextConfigs = replaceAt(prevKeyConfigs[combinationIndex].configs, keyConfig, configIndex);
-      return replaceAt(prevKeyConfigs, { ...prevKeyConfigs[combinationIndex], configs: nextConfigs }, combinationIndex);
-    });
+  const selectedKeypad: Keypad | undefined =
+    configState && keypads.find((keypad) => keypad.name === configState.selectedKeypad);
+  const combinationButtonCount = configState ? configState.selectedCombinationButtonNames.length : 0;
+  const combinationCount = combinationButtonCountToCombinationCount(combinationButtonCount);
+  const combinations = useMemo(() => makeCombinations(combinationButtonCount), [combinationButtonCount]);
+  const combinationButtonNames = useMemo(
+    () => new Set(configState?.selectedCombinationButtonNames),
+    [configState?.selectedCombinationButtonNames],
+  );
+  const combinationButtons = useMemo(
+    () => (selectedKeypad ? selectedKeypad.buttons.filter((button) => combinationButtonNames.has(button.name)) : []),
+    [selectedKeypad, combinationButtonNames],
+  );
+
+  const changeConfigsByCombination = useCallback(
+    (combinationIndex: number, setConfig: SetterFunc<KeyConfigByCombination>) =>
+      setConfigState(
+        (prevConfig) =>
+          prevConfig &&
+          setConfigForCombinationForKeyConfigState(
+            prevConfig,
+            combinationIndex,
+            setConfig(prevConfig.configsByCombination[combinationIndex]),
+          ),
+      ),
+    [],
+  );
+  const setKeyConfigState = useCallback((keyConfigState: KeyConfigState, combinationIsFixed: boolean) => {
+    setConfigState(keyConfigState);
+    setCombinationIsFixed(combinationIsFixed);
+    if (combinationIsFixed) {
+      setLastSavedConfig(keyConfigState);
+    }
+  }, []);
+  const onChangeCombination = useCallback((selectedButtonNames: string[]) => {
+    setConfigState((prev) => prev && changeSelectedCombinationButton(prev, selectedButtonNames));
+    setCombinationIsFixed(true);
   }, []);
   const applicationShortCuts = useMemo<readonly ApplicationShortCut[] | undefined>(() => {
-    if (!osType || !application) { return undefined; }
+    if (!osType || !application) {
+      return undefined;
+    }
     const index = applicationShortCutDefinitions.findIndex((applicationShortcut) => {
       return applicationShortcut.applicationName === application;
     });
-    if (index < 0) { return undefined; }
+    if (index < 0) {
+      return undefined;
+    }
     return applicationShortcutsForOs(applicationShortCutDefinitions[index], osType);
   }, [application, osType]);
-  const onChangeCombinationButton = (index: number, checked: boolean) => {
-    const newCombinationButtons = replaceAt(combinationButtons, checked, index);
-    setCombinationButtons(newCombinationButtons);
-    setKeyConfigs(buildDefaultKeyConfigsForCombinationButtons(newCombinationButtons));
+
+  const save = () => {
+    if (configState?.selectedKeypad) {
+      saveConfig(configState.id, configState.label, configState.createdAt, keyConfigStateToSHConfig(configState));
+      setLastSavedConfig(configState);
+    }
   };
-  const checkedCount = combinationButtons.filter((value) => value).length;
+  const clean = () => {
+    if (configState === lastSavedConfig || confirm('保存していない設定は消えますが、よろしいですか？')) {
+      setConfigState(undefined);
+      setLastSavedConfig(undefined);
+      setCombinationIsFixed(false);
+    }
+  };
+
+  let dataSize = 0;
+  if (configState?.selectedKeypad) {
+    const originConfig = keyConfigStateToSHConfig(configState);
+    const encoded = encodeSHConfig(keypads, originConfig);
+    dataSize = encoded.byteLength;
+    console.log(encoded);
+    // const decoded = decodeSHConfig(keypads, encoded.buffer);
+    // console.log({originConfig, encoded, decoded});
+  }
 
   return (
-    <div className={classes.root}>
+    <div>
       <CssBaseline />
       <AppBar position="static">
-        <Typography variant="h6" className={classes.title}>
-          fuzzilia 左手デバイス 設定ツール
-        </Typography>
+        <AppBarContent>
+          <Title variant="h6">fuzzilia 左手デバイス 設定ツール</Title>
+          <ShortCutTypeFormControl>
+            {/*<InputLabel>アプリケーション</InputLabel>*/}
+            <NativeSelect
+              value={application}
+              placeholder="アプリケーション"
+              onChange={(e) => setApplication(e.target.value || undefined)}
+              inputProps={{name: 'application', id: 'application'}}>
+              <option value="">アプリケーションを選択...</option>
+              {applicationNames.map((applicationName) => (
+                <option key={applicationName} value={applicationName}>
+                  {applicationName}
+                </option>
+              ))}
+            </NativeSelect>
+          </ShortCutTypeFormControl>
+          <OsFormControl>
+            {/*<InputLabel variant="outlined">OS</InputLabel>*/}
+            <NativeSelect
+              value={osType}
+              onChange={(e) => setOsType(e.target.value ? Number(e.target.value) : undefined)}
+              inputProps={{name: 'os-type', id: 'os-type'}}>
+              <option value="" />
+              <option value={OsType.IOS}>iOS</option>
+              <option value={OsType.MAC}>Mac</option>
+              <option value={OsType.WINDOWS}>Windows</option>
+            </NativeSelect>
+          </OsFormControl>
+        </AppBarContent>
       </AppBar>
       <Container maxWidth="md">
-        <Box display="flex" flexDirection="column">
-          <Card className={classes.typeConfigCard}>
-            <CardHeader title="全体設定" />
-            <Box display="flex" flexDirection="column">
-              <Box display="flex" flexDirection="row">
-                <FormControl className={classes.shortcutTypeControl}>
-                  <InputLabel htmlFor="shortcut-type">アプリケーション</InputLabel>
-                  <NativeSelect
-                    value={application}
-                    onChange={(e) => setApplication(e.target.value || undefined)}
-                    inputProps={{
-                      name: 'application',
-                      id: 'application',
-                    }}
-                  >
-                    <option value="" />
-                    {applicationNames.map((applicationName) =>
-                      <option key={applicationName} value={applicationName}>{applicationName}</option>)}
-                  </NativeSelect>
-                </FormControl>
-                <FormControl className={classes.osSelect}>
-                  <InputLabel htmlFor="shortcut-type">OS</InputLabel>
-                  <NativeSelect
-                    value={osType}
-                    onChange={(e) => setOsType(e.target.value ? Number(e.target.value) : undefined)}
-                    inputProps={{
-                      name: 'os-type',
-                      id: 'os-type',
-                    }}
-                  >
-                    <option value="" />
-                    <option value={OsType.IOS}>iOS</option>
-                    <option value={OsType.MAC}>Mac</option>
-                    <option value={OsType.WINDOWS}>Windows</option>
-                  </NativeSelect>
-                </FormControl>
-              </Box>
-              <FormControl className={classes.headerForm}>
-                <FormGroup>
-                  <FormLabel component="legend">組み合わせボタン</FormLabel>
-                  <Box className={classes.checkboxGroup}>
-                    {combinationButtons.map((isSelected, index) => (
-                      <FormControlLabel
-                        key={index}
-                        control={<Checkbox checked={isSelected} onChange={(e, checked) => onChangeCombinationButton(index, checked)} />}
-                        label={index + 1}
-                        disabled={checkedCount >= MaxCombinationButtonCount && !isSelected}
-                      />
-                    ))}
+        {configState && selectedKeypad ? (
+          combinationIsFixed ? (
+            <MainContentBox>
+              <TypeConfigCard>
+                <CardHeader
+                  title="基本設定"
+                  action={
+                    <Button variant="outlined" color="secondary" onClick={clean}>
+                      初期画面に戻る
+                    </Button>
+                  }
+                />
+                <TypeConfigCardContent>
+                  <FormRowBox>
+                    <FormLabel>設定名 : </FormLabel>
+                    <FormTextField
+                      value={configState.label}
+                      onChange={(e) => setConfigState({...configState, label: e.target.value})}
+                    />
+                    <FormOptionButton variant="outlined" color="primary" onClick={save}>
+                      ブラウザに保存
+                    </FormOptionButton>
+                  </FormRowBox>
+                  <FormRowBox>
+                    <FormLabel>データサイズ : </FormLabel>
+                    <FormValueText>{dataSize}</FormValueText>
+                  </FormRowBox>
+                  <DeviceFormRow keypad={selectedKeypad} configState={configState} />
+                  <SelectedCombinationButtonView
+                    combinationButtons={combinationButtons}
+                    onEdit={() => setCombinationIsFixed(false)}
+                  />
+                </TypeConfigCardContent>
+                <Box display="flex" flexDirection="column">
+                  <Box display="flex" flexDirection="row">
+                    <ShortCutTypeFormControl>
+                      <InputLabel htmlFor="shortcut-type">アプリケーション</InputLabel>
+                      <NativeSelect
+                        value={application}
+                        onChange={(e) => setApplication(e.target.value || undefined)}
+                        inputProps={{
+                          name: 'application',
+                          id: 'application',
+                        }}>
+                        <option value="" />
+                        {applicationNames.map((applicationName) => (
+                          <option key={applicationName} value={applicationName}>
+                            {applicationName}
+                          </option>
+                        ))}
+                      </NativeSelect>
+                    </ShortCutTypeFormControl>
+                    <OsFormControl>
+                      <InputLabel htmlFor="shortcut-type">OS</InputLabel>
+                      <NativeSelect
+                        value={osType}
+                        onChange={(e) => setOsType(e.target.value ? Number(e.target.value) : undefined)}
+                        inputProps={{
+                          name: 'os-type',
+                          id: 'os-type',
+                        }}>
+                        <option value="" />
+                        <option value={OsType.IOS}>iOS</option>
+                        <option value={OsType.MAC}>Mac</option>
+                        <option value={OsType.WINDOWS}>Windows</option>
+                      </NativeSelect>
+                    </OsFormControl>
                   </Box>
-                </FormGroup>
-              </FormControl>
-            </Box>
-          </Card>
-          <Box className={classes.keyConfigArea}>
-            {keyConfigs.map((keyConfig, index) => (
-              <KeyConfigExpansionPanel
-                key={index}
-                {...keyConfig}
-                index={index}
-                onChange={onChange}
-                applicationShortCuts={applicationShortCuts}
-              />
-            ))}
-          </Box>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => writeKeyConfig(keyConfigs)}
-            className={classes.submitButton}
-          >
-            書き込み
-          </Button>
-        </Box>
+                </Box>
+              </TypeConfigCard>
+              <KeyConfigArea>
+                {[...Array(combinationCount)].map((_, index) => (
+                  <KeyConfigAccordion
+                    key={index}
+                    keypad={selectedKeypad}
+                    index={index}
+                    onChange={changeConfigsByCombination}
+                    applicationShortCuts={applicationShortCuts}
+                    combinationButtonStates={combinations[index]}
+                    combinationButtons={combinationButtons}
+                    config={configState.configsByCombination[index]}
+                  />
+                ))}
+              </KeyConfigArea>
+            </MainContentBox>
+          ) : (
+            <SelectCombinationButtonPanel
+              buttons={selectedKeypad.buttons}
+              defaultSelectedButtonNames={combinationButtonNames}
+              onChange={onChangeCombination}
+            />
+          )
+        ) : (
+          <SelectKeypadPanel onChange={setKeyConfigState} />
+        )}
       </Container>
     </div>
   );
 };
-
-export default App;

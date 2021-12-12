@@ -1,20 +1,24 @@
-export interface KeyConfig {
-  readonly buttonNumber: number;
-  readonly shift?: boolean;
-  readonly control?: boolean;
-  readonly alt?: boolean;
-  readonly gui?: boolean;
-  readonly key?: number;
-}
+import {ModifierKeyBase, SHButtonConfig, SHMotionConfig, SHStickConfig} from './models/SHConConfig';
+import {KeypadName} from './models/keypads';
 
 export interface CombinationButtonState {
   readonly buttonNumber: number;
   readonly isOn: boolean;
 }
 
-export interface KeyConfigsByCombinationButtonState {
-  readonly combinationButtonStates: readonly CombinationButtonState[];
-  readonly configs: readonly KeyConfig[];
+export interface KeyConfigByCombination {
+  buttons: (SHButtonConfig | undefined)[];
+  sticks: (SHStickConfig | undefined)[];
+  motion?: SHMotionConfig;
+}
+
+export interface KeyConfigState {
+  readonly id: number;
+  readonly label: string;
+  readonly createdAt: number;
+  readonly selectedKeypad?: KeypadName;
+  readonly selectedCombinationButtonNames: readonly string[];
+  readonly configsByCombination: readonly KeyConfigByCombination[];
 }
 
 export interface GeneralShortCut {
@@ -24,11 +28,7 @@ export interface GeneralShortCut {
   readonly key?: number;
 }
 
-export interface ShortCut {
-  readonly shift?: boolean;
-  readonly control?: boolean;
-  readonly alt?: boolean;
-  readonly gui?: boolean;
+export interface ShortCut extends ModifierKeyBase {
   readonly key?: number;
 }
 
@@ -52,7 +52,9 @@ export interface ApplicationShortCutDefinition {
 export enum OsType {
   IOS = 1,
   WINDOWS,
-  MAC
+  MAC,
 }
 
-export type Writable<T> = { -readonly [P in keyof T]: T[P] };
+export type Writable<T> = {-readonly [P in keyof T]: T[P]};
+
+export type SetterFunc<T> = (prev: T) => T;

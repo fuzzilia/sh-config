@@ -19,7 +19,7 @@ github pagesにホスティングすることを想定しています。
 git clone https://github.com/fuzzilia/sh-config.git
 cd sh-config
 yarn
-yarn start
+yarn dev
 ```
 
 ## License
