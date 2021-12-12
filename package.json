@@ -45,7 +45,7 @@
   },
   "scripts": {
     "test": "jest",
-    "build": "webpack --mode production",
+    "build": "NODE_ENV=production webpack --mode production",
     "dev": "webpack serve --hot --mode development --content-base public",
     "lint": "eslint --ext .jsx,.js,.tsx,.ts ./src && prettier -c src",
     "prettier": "prettier -w src",
