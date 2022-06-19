@@ -381,35 +381,6 @@ class MotionSensorManager {
   }
 }
 
-const stickConfig4: SHFourButtonStickConfig = {
-  type: '4-button',
-};
-
-const stickConfig8: SHEightButtonStickConfig = {
-  type: '8-button',
-};
-
-const stickConfigRotate8: SHRotateStickConfig = {
-  type: 'rotate',
-  splitSize: 8,
-};
-
-const stickConfigRotate16: SHRotateStickConfig = {
-  type: 'rotate',
-  splitSize: 16,
-};
-
-const motionConfigRotate16: SHRotateMotionConfig = {
-  type: 'rotate',
-  locksAxis: true,
-  splitSize: {x: 16, y: 16, z: 16},
-};
-
-const motionConfigNoLockRotate16: SHRotateMotionConfig = {
-  type: 'rotate',
-  splitSize: {x: 16, y: 16, z: 16},
-};
-
 export interface SHControllerState {
   readonly keys: readonly KeyConfig[];
   readonly sticks: readonly (SHStickState | undefined)[];
