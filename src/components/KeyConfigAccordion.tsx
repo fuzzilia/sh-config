@@ -105,17 +105,20 @@ export const KeyConfigAccordion = React.memo<KeyConfigAccordionProps>(
               </TableRow>
             </TableHead>
             <TableBody>
-              {buttons.map((keypadButton, buttonIndex) => (
-                <ButtonConfigRow
-                  key={keypadButton.name}
-                  index={buttonIndex}
-                  button={keypadButton}
-                  config={config.buttons[buttonIndex]}
-                  onChange={changeButtonConfig}
-                  applicationShortCuts={applicationShortCuts}
-                  motionEnabled={!!keypad.has6AxisSensor}
-                />
-              ))}
+              {buttons.map(
+                (keypadButton, buttonIndex) =>
+                  !keypadButton.isUnused && (
+                    <ButtonConfigRow
+                      key={keypadButton.name}
+                      index={buttonIndex}
+                      button={keypadButton}
+                      config={config.buttons[buttonIndex]}
+                      onChange={changeButtonConfig}
+                      applicationShortCuts={applicationShortCuts}
+                      motionEnabled={!!keypad.has6AxisSensor}
+                    />
+                  ),
+              )}
               {keypad.sticks.map((stick, stickIndex) => (
                 <StickConfigRow
                   key={stick.name}

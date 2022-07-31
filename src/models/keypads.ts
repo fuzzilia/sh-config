@@ -2,6 +2,7 @@ export interface KeypadButton {
   readonly label: string;
   readonly name: string;
   readonly number: number;
+  readonly isUnused?: boolean;
 }
 
 export interface KeypadStick {
@@ -85,7 +86,30 @@ export const keypadShControllerV1 = inferKeypadType({
   has6AxisSensor: false,
 } as const);
 
-export const keypads = [keypadShControllerV1, keypadJoyConL, keypadJoyConR];
+export const keypadShControllerNrf52_v1 = inferKeypadType({
+  name: 'sh-controller-nrf52-v1',
+  label: 'SH-Controller nRF52 v1',
+  id: 0x0002,
+  buttons: [
+    {name: 'up', number: 6, label: '上'},
+    {name: 'upLeft', number: 10, label: '左上'},
+    {name: 'upRight', number: 1, label: '右上'},
+    {name: 'center', number: 2, label: '中央'},
+    {name: 'downLeft', number: 3, label: '左下'},
+    {name: 'downRight', number: 9, label: '右下'},
+    {name: 'down', number: 5, label: '下'},
+    {name: 'z1', number: 0, label: 'Z1'},
+    {name: 'z2', number: 4, label: 'Z2'},
+    {name: 'z3', number: 8, label: 'Z3'},
+    {name: 'u1', number: 7, label: '', isUnused: true},
+    {name: 'u2', number: 11, label: '', isUnused: true},
+  ],
+  sticks: [{name: '0', number: 0, label: 'スティック'}],
+  has6AxisSensor: true,
+} as const);
+
+// export const keypads = [keypadShControllerV1, keypadJoyConL, keypadJoyConR];
+export const keypads = [keypadShControllerNrf52_v1];
 
 export type KeypadName = typeof keypads[number]['name'];
 export type KeypadButtons = typeof keypads[number]['buttons'];
