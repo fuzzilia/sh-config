@@ -166,24 +166,30 @@ export const defaultKeyConfigByCombination: KeyConfigByCombination = {
 };
 
 export const defaultKeyConfigsByKeypadName: Record<KeypadName, Omit<KeyConfigState, 'id' | 'createdAt'>> = {
-  'sh-controller-v1': {
+  'sh-controller-nrf52-v1': {
     label: '名称未設定',
-    selectedKeypad: 'sh-controller-v1',
-    selectedCombinationButtonNames: ['8', '9', '10'],
+    selectedKeypad: 'sh-controller-nrf52-v1',
+    selectedCombinationButtonNames: ['z1', 'z2', 'z3'],
     configsByCombination: [...Array(8)].map(() => defaultKeyConfigByCombination),
   },
-  'joy-con-L': {
-    label: '名称未設定',
-    selectedKeypad: 'joy-con-L',
-    selectedCombinationButtonNames: ['l', 'zl'],
-    configsByCombination: [...Array(4)].map(() => defaultKeyConfigByCombination),
-  },
-  'joy-con-R': {
-    label: '名称未設定',
-    selectedKeypad: 'joy-con-R',
-    selectedCombinationButtonNames: ['r', 'zr'],
-    configsByCombination: [...Array(4)].map(() => defaultKeyConfigByCombination),
-  },
+  // 'sh-controller-v1': {
+  //   label: '名称未設定',
+  //   selectedKeypad: 'sh-controller-v1',
+  //   selectedCombinationButtonNames: ['8', '9', '10'],
+  //   configsByCombination: [...Array(8)].map(() => defaultKeyConfigByCombination),
+  // },
+  // 'joy-con-L': {
+  //   label: '名称未設定',
+  //   selectedKeypad: 'joy-con-L',
+  //   selectedCombinationButtonNames: ['l', 'zl'],
+  //   configsByCombination: [...Array(4)].map(() => defaultKeyConfigByCombination),
+  // },
+  // 'joy-con-R': {
+  //   label: '名称未設定',
+  //   selectedKeypad: 'joy-con-R',
+  //   selectedCombinationButtonNames: ['r', 'zr'],
+  //   configsByCombination: [...Array(4)].map(() => defaultKeyConfigByCombination),
+  // },
 };
 
 export const applicationShortCutDefinitions: readonly ApplicationShortCutDefinition[] = [
