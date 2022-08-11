@@ -27,7 +27,8 @@ const SplitCountInput = styled(NativeSelect)`
   margin-left: ${({theme}) => theme.spacing(2)};
 `;
 
-const rotateSplitCount = [...Array(0x0f)].map((_, i) => (i + 1) * 4);
+// const rotateSplitCount = [...Array(0x0f)].map((_, i) => (i + 1) * 4);
+const rotateSplitCount = [...Array(6)].map((_, i) => (i + 1) * 4);
 
 export const StickConfigRow: React.FC<StickConfigRowProps> = ({
   config,
