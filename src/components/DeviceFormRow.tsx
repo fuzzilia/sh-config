@@ -21,6 +21,7 @@ export const DeviceFormRow: React.FC<DeviceFormRowProps> = ({keypad, configState
   const closeTestModal = useCallback(() => setTestModalIsOpen(false), []);
   const closePairingModal = useCallback(() => setPairingModalIsOpen(false), []);
   const openTestModal = useCallback(() => setTestModalIsOpen(true), []);
+  const [isWriting, setIsWriting] = useState<boolean>(false);
   const connect = useCallback(async () => {
     if (!keyConfigService) {
       try {
@@ -51,10 +52,14 @@ export const DeviceFormRow: React.FC<DeviceFormRowProps> = ({keypad, configState
       return;
     }
     try {
+      setIsWriting(true);
       await keyConfigService.writeConfig(keyConfigStateToSHConfig(configState));
+      alert('書き込みに成功しました。');
     } catch (error) {
       console.error(error);
-      alert(error?.message ?? '不明なエラーが発生しました。');
+      alert(error?.message ? `エラーが発生しました。${error.message}` : '不明なエラーが発生しました。');
+    } finally {
+      setIsWriting(false);
     }
   }, [configState, keyConfigService]);
   const disconnect = useCallback(() => keyConfigService?.disconnect(), [keyConfigService]);
@@ -72,13 +77,15 @@ export const DeviceFormRow: React.FC<DeviceFormRowProps> = ({keypad, configState
       )}
       {keyConfigService ? (
         <>
-          <FormOptionButton variant="outlined" color="primary" onClick={writeConfig}>
+          <FormOptionButton variant="outlined" color="primary" onClick={writeConfig} disabled={isWriting}>
             書き込み
           </FormOptionButton>
-          <FormOptionButton variant="outlined" color="primary" onClick={scan}>
-            ペアリング
-          </FormOptionButton>
-          <FormOptionButton variant="outlined" color="secondary" onClick={disconnect}>
+          {isJoycon(keypad) && (
+            <FormOptionButton variant="outlined" color="primary" onClick={scan} disabled={isWriting}>
+              ペアリング
+            </FormOptionButton>
+          )}
+          <FormOptionButton variant="outlined" color="secondary" onClick={disconnect} disabled={isWriting}>
             切断
           </FormOptionButton>
         </>

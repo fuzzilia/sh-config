@@ -130,6 +130,7 @@ export const App: React.FC = () => {
     if (configState?.selectedKeypad) {
       saveConfig(configState.id, configState.label, configState.createdAt, keyConfigStateToSHConfig(configState));
       setLastSavedConfig(configState);
+      alert('保存に成功しました。');
     }
   };
   const clean = () => {
@@ -145,7 +146,7 @@ export const App: React.FC = () => {
     const originConfig = keyConfigStateToSHConfig(configState);
     const encoded = encodeSHConfig(keypads, originConfig);
     dataSize = encoded.byteLength;
-    console.log(encoded);
+    // console.log(encoded);
     // const decoded = decodeSHConfig(keypads, encoded.buffer);
     // console.log({originConfig, encoded, decoded});
   }
