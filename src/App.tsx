@@ -156,33 +156,31 @@ export const App: React.FC = () => {
       <AppBar position="static">
         <AppBarContent>
           <Title variant="h6">fuzzilia 左手デバイス 設定ツール</Title>
-          <ShortCutTypeFormControl>
-            {/*<InputLabel>アプリケーション</InputLabel>*/}
-            <NativeSelect
-              value={application}
-              placeholder="アプリケーション"
-              onChange={(e) => setApplication(e.target.value || undefined)}
-              inputProps={{name: 'application', id: 'application'}}>
-              <option value="">アプリケーションを選択...</option>
-              {applicationNames.map((applicationName) => (
-                <option key={applicationName} value={applicationName}>
-                  {applicationName}
-                </option>
-              ))}
-            </NativeSelect>
-          </ShortCutTypeFormControl>
-          <OsFormControl>
-            {/*<InputLabel variant="outlined">OS</InputLabel>*/}
-            <NativeSelect
-              value={osType}
-              onChange={(e) => setOsType(e.target.value ? Number(e.target.value) : undefined)}
-              inputProps={{name: 'os-type', id: 'os-type'}}>
-              <option value="" />
-              <option value={OsType.IOS}>iOS</option>
-              <option value={OsType.MAC}>Mac</option>
-              <option value={OsType.WINDOWS}>Windows</option>
-            </NativeSelect>
-          </OsFormControl>
+          {/*<ShortCutTypeFormControl>*/}
+          {/*  <NativeSelect*/}
+          {/*    value={application}*/}
+          {/*    placeholder="アプリケーション"*/}
+          {/*    onChange={(e) => setApplication(e.target.value || undefined)}*/}
+          {/*    inputProps={{name: 'application', id: 'application'}}>*/}
+          {/*    <option value="">アプリケーションを選択...</option>*/}
+          {/*    {applicationNames.map((applicationName) => (*/}
+          {/*      <option key={applicationName} value={applicationName}>*/}
+          {/*        {applicationName}*/}
+          {/*      </option>*/}
+          {/*    ))}*/}
+          {/*  </NativeSelect>*/}
+          {/*</ShortCutTypeFormControl>*/}
+          {/*<OsFormControl>*/}
+          {/*  <NativeSelect*/}
+          {/*    value={osType}*/}
+          {/*    onChange={(e) => setOsType(e.target.value ? Number(e.target.value) : undefined)}*/}
+          {/*    inputProps={{name: 'os-type', id: 'os-type'}}>*/}
+          {/*    <option value="" />*/}
+          {/*    <option value={OsType.IOS}>iOS</option>*/}
+          {/*    <option value={OsType.MAC}>Mac</option>*/}
+          {/*    <option value={OsType.WINDOWS}>Windows</option>*/}
+          {/*  </NativeSelect>*/}
+          {/*</OsFormControl>*/}
         </AppBarContent>
       </AppBar>
       <Container maxWidth="md">
@@ -219,42 +217,42 @@ export const App: React.FC = () => {
                     onEdit={() => setCombinationIsFixed(false)}
                   />
                 </TypeConfigCardContent>
-                <Box display="flex" flexDirection="column">
-                  <Box display="flex" flexDirection="row">
-                    <ShortCutTypeFormControl>
-                      <InputLabel htmlFor="shortcut-type">アプリケーション</InputLabel>
-                      <NativeSelect
-                        value={application}
-                        onChange={(e) => setApplication(e.target.value || undefined)}
-                        inputProps={{
-                          name: 'application',
-                          id: 'application',
-                        }}>
-                        <option value="" />
-                        {applicationNames.map((applicationName) => (
-                          <option key={applicationName} value={applicationName}>
-                            {applicationName}
-                          </option>
-                        ))}
-                      </NativeSelect>
-                    </ShortCutTypeFormControl>
-                    <OsFormControl>
-                      <InputLabel htmlFor="shortcut-type">OS</InputLabel>
-                      <NativeSelect
-                        value={osType}
-                        onChange={(e) => setOsType(e.target.value ? Number(e.target.value) : undefined)}
-                        inputProps={{
-                          name: 'os-type',
-                          id: 'os-type',
-                        }}>
-                        <option value="" />
-                        <option value={OsType.IOS}>iOS</option>
-                        <option value={OsType.MAC}>Mac</option>
-                        <option value={OsType.WINDOWS}>Windows</option>
-                      </NativeSelect>
-                    </OsFormControl>
-                  </Box>
-                </Box>
+                {/*<Box display="flex" flexDirection="column">*/}
+                {/*  <Box display="flex" flexDirection="row">*/}
+                {/*    <ShortCutTypeFormControl>*/}
+                {/*      <InputLabel htmlFor="shortcut-type">アプリケーション</InputLabel>*/}
+                {/*      <NativeSelect*/}
+                {/*        value={application}*/}
+                {/*        onChange={(e) => setApplication(e.target.value || undefined)}*/}
+                {/*        inputProps={{*/}
+                {/*          name: 'application',*/}
+                {/*          id: 'application',*/}
+                {/*        }}>*/}
+                {/*        <option value="" />*/}
+                {/*        {applicationNames.map((applicationName) => (*/}
+                {/*          <option key={applicationName} value={applicationName}>*/}
+                {/*            {applicationName}*/}
+                {/*          </option>*/}
+                {/*        ))}*/}
+                {/*      </NativeSelect>*/}
+                {/*    </ShortCutTypeFormControl>*/}
+                {/*    <OsFormControl>*/}
+                {/*      <InputLabel htmlFor="shortcut-type">OS</InputLabel>*/}
+                {/*      <NativeSelect*/}
+                {/*        value={osType}*/}
+                {/*        onChange={(e) => setOsType(e.target.value ? Number(e.target.value) : undefined)}*/}
+                {/*        inputProps={{*/}
+                {/*          name: 'os-type',*/}
+                {/*          id: 'os-type',*/}
+                {/*        }}>*/}
+                {/*        <option value="" />*/}
+                {/*        <option value={OsType.IOS}>iOS</option>*/}
+                {/*        <option value={OsType.MAC}>Mac</option>*/}
+                {/*        <option value={OsType.WINDOWS}>Windows</option>*/}
+                {/*      </NativeSelect>*/}
+                {/*    </OsFormControl>*/}
+                {/*  </Box>*/}
+                {/*</Box>*/}
               </TypeConfigCard>
               <KeyConfigArea>
                 {[...Array(combinationCount)].map((_, index) => (
