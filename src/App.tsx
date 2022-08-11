@@ -156,7 +156,7 @@ export const App: React.FC = () => {
       <CssBaseline />
       <AppBar position="static">
         <AppBarContent>
-          <Title variant="h6">fuzzilia 左手デバイス 設定ツール</Title>
+          <Title variant="h6">SH-Controller 設定ツール</Title>
           {/*<ShortCutTypeFormControl>*/}
           {/*  <NativeSelect*/}
           {/*    value={application}*/}
