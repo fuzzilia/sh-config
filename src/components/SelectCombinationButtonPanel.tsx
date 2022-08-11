@@ -53,19 +53,22 @@ export const SelectCombinationButtonPanel: React.FC<SelectCombinationButtonPanel
         <FormControl>
           <FormGroup>
             <CombinationCheckboxGroupBox>
-              {buttons.map(({name, label}, index) => (
-                <FormControlLabel
-                  key={name}
-                  control={
-                    <Checkbox
-                      checked={checkedStates[index]}
-                      onChange={(_, checked) => setCheckedState((prev) => replaceAt(prev, checked, index))}
+              {buttons.map(
+                ({name, label, isUnused}, index) =>
+                  !isUnused && (
+                    <FormControlLabel
+                      key={name}
+                      control={
+                        <Checkbox
+                          checked={checkedStates[index]}
+                          onChange={(_, checked) => setCheckedState((prev) => replaceAt(prev, checked, index))}
+                        />
+                      }
+                      label={label}
+                      disabled={checkedCount >= MaxCombinationButtonCount && !checkedStates[index]}
                     />
-                  }
-                  label={label}
-                  disabled={checkedCount >= MaxCombinationButtonCount && !checkedStates[index]}
-                />
-              ))}
+                  ),
+              )}
             </CombinationCheckboxGroupBox>
           </FormGroup>
           <SubmitButton
