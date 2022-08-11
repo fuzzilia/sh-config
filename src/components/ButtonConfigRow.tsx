@@ -111,10 +111,12 @@ export const ButtonConfigRow = React.memo<ButtonConfigRowProps>(
             <TableCell align="left">
               <BreakableLabel label={button.label} />
             </TableCell>
-            {motionEnabled && (
+            {motionEnabled ? (
               <TableCell align="center">
                 <OperationTypeSelector type={undefined} onChange={changeType} />
               </TableCell>
+            ) : (
+              <TableCell align="left">押下</TableCell>
             )}
             <KeySelectorCells
               keyConfig={config?.key}

@@ -105,7 +105,7 @@ export const keypadShControllerNrf52_v1 = inferKeypadType({
     {name: 'u2', number: 11, label: '', isUnused: true},
   ],
   sticks: [{name: '0', number: 0, label: 'スティック'}],
-  has6AxisSensor: true,
+  has6AxisSensor: false,
 } as const);
 
 // export const keypads = [keypadShControllerV1, keypadJoyConL, keypadJoyConR];

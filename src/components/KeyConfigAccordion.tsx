@@ -98,7 +98,7 @@ export const KeyConfigAccordion = React.memo<KeyConfigAccordionProps>(
             <TableHead>
               <TableRow>
                 <TableCell align="left">設定対象</TableCell>
-                {keypad.has6AxisSensor && <TableCell align="center">操作</TableCell>}
+                <TableCell align="center">操作</TableCell>
                 <TableCell align="center">修飾キー</TableCell>
                 <TableCell align="center">キー</TableCell>
                 {applicationShortCuts && <TableCell align="center">ショートカット</TableCell>}
