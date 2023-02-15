@@ -1,7 +1,5 @@
 import {
-  KeyConfig,
   positiveAndNegativeConfigActiveCount,
-  PositiveAndNegativeKeyConfig,
   shButtonConfigActiveCount,
   shButtonConfigsActiveCount,
   SHConConfig,
@@ -12,6 +10,7 @@ import {
 } from './SHConConfig';
 import {Keypad} from './keypads';
 import {makeCombinations} from './KeyConfig';
+import {KeyConfig, PositiveAndNegativeKeyConfig} from "../types";
 
 export enum ButtonBlockType {
   Empty = 0,

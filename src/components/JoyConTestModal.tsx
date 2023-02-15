@@ -12,8 +12,8 @@ import {
   SHMotionState,
   SHStickState,
 } from '../models/SHControllerManager';
-import {KeyConfig, keyConfigStateToSHConfig} from '../models/SHConConfig';
-import {KeyConfigState} from '../types';
+import {keyConfigStateToSHConfig} from '../models/SHConConfig';
+import {KeyConfig, KeyConfigState} from '../types';
 import {keyCodeToKey} from '../models/KeyConfig';
 import {SHConfigManager} from '../models/SHConfigManager';
 import {JoyCon, JoyConInput, JoyConInputReportMode, leftJoyConButtons, rightJoyConButtons} from '../models/JoyCon';

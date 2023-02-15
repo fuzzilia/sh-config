@@ -1,13 +1,4 @@
-import {
-  KeyConfig,
-  rotateAxes,
-  SHEightButtonStickConfig,
-  SHFourButtonStickConfig,
-  SHMotionConfig,
-  SHRotateMotionConfig,
-  SHRotateStickConfig,
-  SHStickConfig,
-} from './SHConConfig';
+import {rotateAxes,} from './SHConConfig';
 import {
   emptyProcessRotateRelativeResult,
   initialProcessRotateRelativeState,
@@ -15,6 +6,7 @@ import {
   ProcessRotateRelativeState,
 } from './processRotate';
 import {SHConfigManager} from './SHConfigManager';
+import {KeyConfig, SHMotionConfig, SHStickConfig} from "../types";
 
 export type FourButtonDirection = 'upKey' | 'rightKey' | 'downKey' | 'leftKey';
 export const fourButtonDirections: readonly FourButtonDirection[] = ['upKey', 'rightKey', 'downKey', 'leftKey'];

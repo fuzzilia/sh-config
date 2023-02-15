@@ -1,9 +1,77 @@
-import {ModifierKeyBase, SHButtonConfig, SHMotionConfig, SHStickConfig} from './models/SHConConfig';
 import {KeypadName} from './models/keypads';
 
 export interface CombinationButtonState {
   readonly buttonNumber: number;
   readonly isOn: boolean;
+}
+
+export type SHButtonConfig = SHNormalButtonConfig | SHMotionButtonConfig;
+
+export interface SHNormalButtonConfig {
+  type?: undefined;
+  key?: KeyConfig;
+}
+
+export type SHMotionConfig = SHGestureMotionConfig | SHRotateMotionConfig;
+
+export interface SHGestureMotionConfig {
+  type: 'gesture';
+  rotate?: {
+    x?: PositiveAndNegativeKeyConfig;
+    y?: PositiveAndNegativeKeyConfig;
+    z?: PositiveAndNegativeKeyConfig;
+  };
+}
+
+export interface SHRotateMotionConfig {
+  type: 'rotate';
+  locksAxis?: boolean;
+  splitSize: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  x?: PositiveAndNegativeKeyConfig;
+  y?: PositiveAndNegativeKeyConfig;
+  z?: PositiveAndNegativeKeyConfig;
+}
+
+export interface SHMotionButtonConfig {
+  type: 'motion';
+  motion: SHMotionConfig;
+}
+
+export type SHStickConfig = SHFourButtonStickConfig | SHEightButtonStickConfig | SHRotateStickConfig;
+
+export interface SHFourButtonStickConfig {
+  type: '4-button';
+  upKey?: KeyConfig;
+  rightKey?: KeyConfig;
+  downKey?: KeyConfig;
+  leftKey?: KeyConfig;
+}
+
+export interface SHEightButtonStickConfig {
+  type: '8-button';
+  upKey?: KeyConfig;
+  upRightKey?: KeyConfig;
+  rightKey?: KeyConfig;
+  downRightKey?: KeyConfig;
+  downKey?: KeyConfig;
+  downLeftKey?: KeyConfig;
+  leftKey?: KeyConfig;
+  upLeftKey?: KeyConfig;
+}
+
+export interface PositiveAndNegativeKeyConfig {
+  positive?: KeyConfig;
+  negative?: KeyConfig;
+}
+
+export interface SHRotateStickConfig {
+  type: 'rotate';
+  splitSize: number;
+  key?: PositiveAndNegativeKeyConfig;
 }
 
 export interface KeyConfigByCombination {
@@ -25,6 +93,17 @@ export interface GeneralShortCut {
   readonly shift?: boolean;
   readonly alt?: boolean;
   readonly controlOrCmd?: boolean;
+  readonly key?: number;
+}
+
+export interface ModifierKeyBase {
+  readonly shift?: boolean;
+  readonly ctrl?: boolean;
+  readonly alt?: boolean;
+  readonly gui?: boolean;
+}
+
+export interface KeyConfig extends ModifierKeyBase {
   readonly key?: number;
 }
 

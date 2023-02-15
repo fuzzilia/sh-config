@@ -1,17 +1,21 @@
 import {
-  ModifierKeyBase,
-  PositiveAndNegativeKeyConfig,
-  SHButtonConfig,
   SHConConfig,
   SHConConfigByCombination,
   shConfigCombinationKey,
-  SHGestureMotionConfig,
-  SHRotateMotionConfig,
-  SHStickConfig,
+
+
+
 } from './SHConConfig';
 import {Keypad, KeypadButton} from './keypads';
 import {makeCombinations} from './KeyConfig';
 import {ButtonBlockType, StickBlockType} from './SHConfigEncoder';
+import {
+  ModifierKeyBase,
+  PositiveAndNegativeKeyConfig,
+  SHButtonConfig, SHGestureMotionConfig,
+  SHRotateMotionConfig,
+  SHStickConfig
+} from "../types";
 
 function numberToModifier(value: number): ModifierKeyBase {
   const ctrl = value & 0x01 ? true : undefined;

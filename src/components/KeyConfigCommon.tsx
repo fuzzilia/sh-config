@@ -1,8 +1,7 @@
 import React from 'react';
 import NativeSelect from '@mui/material/NativeSelect';
 import {modifierFromStringValue, modifierKeyOptions, modifierKeyToStringValue} from '../models/ModifierKeys';
-import {KeyConfig} from '../models/SHConConfig';
-import {ApplicationShortCut} from '../types';
+import {ApplicationShortCut, KeyConfig} from '../types';
 import {isEqualShortCut, keyCodes} from '../models/KeyConfig';
 import {KeypadButton} from '../models/keypads';
 import Box from '@mui/material/Box';

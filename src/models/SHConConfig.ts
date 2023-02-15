@@ -1,32 +1,20 @@
 import {KeypadButton, KeypadName, keypads, KeypadStick} from './keypads';
 import {eightButtonDirections, fourButtonDirections} from './SHControllerManager';
-import {KeyConfigByCombination, KeyConfigState} from '../types';
+import {
+  KeyConfig,
+  KeyConfigByCombination,
+  KeyConfigState,
+  PositiveAndNegativeKeyConfig,
+  SHButtonConfig,
+  SHGestureMotionConfig,
+  SHMotionButtonConfig,
+  SHMotionConfig,
+  SHRotateMotionConfig,
+  SHStickConfig
+} from '../types';
 import {replaceAt} from './utils';
 import {ConfigStorageIndex} from './ConfigStorage';
 import {makeCombinations} from './KeyConfig';
-
-export interface ModifierKeyBase {
-  readonly shift?: boolean;
-  readonly ctrl?: boolean;
-  readonly alt?: boolean;
-  readonly gui?: boolean;
-}
-
-export interface KeyConfig extends ModifierKeyBase {
-  readonly key?: number;
-}
-
-export type SHButtonConfig = SHNormalButtonConfig | SHMotionButtonConfig;
-
-export interface SHNormalButtonConfig {
-  type?: undefined;
-  key?: KeyConfig;
-}
-
-export interface SHMotionButtonConfig {
-  type: 'motion';
-  motion: SHMotionConfig;
-}
 
 export interface SHConConfigByCombination {
   readonly buttons: {readonly [key: string]: SHButtonConfig | undefined};
@@ -38,63 +26,6 @@ export interface SHConConfig {
   readonly keypadName: KeypadName;
   readonly combinationButtonNames: readonly string[];
   readonly configsByCombination: {readonly [key: string]: SHConConfigByCombination};
-}
-
-export type SHStickConfig = SHFourButtonStickConfig | SHEightButtonStickConfig | SHRotateStickConfig;
-
-export interface SHFourButtonStickConfig {
-  type: '4-button';
-  upKey?: KeyConfig;
-  rightKey?: KeyConfig;
-  downKey?: KeyConfig;
-  leftKey?: KeyConfig;
-}
-
-export interface SHEightButtonStickConfig {
-  type: '8-button';
-  upKey?: KeyConfig;
-  upRightKey?: KeyConfig;
-  rightKey?: KeyConfig;
-  downRightKey?: KeyConfig;
-  downKey?: KeyConfig;
-  downLeftKey?: KeyConfig;
-  leftKey?: KeyConfig;
-  upLeftKey?: KeyConfig;
-}
-
-export interface PositiveAndNegativeKeyConfig {
-  positive?: KeyConfig;
-  negative?: KeyConfig;
-}
-
-export interface SHRotateStickConfig {
-  type: 'rotate';
-  splitSize: number;
-  key?: PositiveAndNegativeKeyConfig;
-}
-
-export type SHMotionConfig = SHGestureMotionConfig | SHRotateMotionConfig;
-
-export interface SHGestureMotionConfig {
-  type: 'gesture';
-  rotate?: {
-    x?: PositiveAndNegativeKeyConfig;
-    y?: PositiveAndNegativeKeyConfig;
-    z?: PositiveAndNegativeKeyConfig;
-  };
-}
-
-export interface SHRotateMotionConfig {
-  type: 'rotate';
-  locksAxis?: boolean;
-  splitSize: {
-    x: number;
-    y: number;
-    z: number;
-  };
-  x?: PositiveAndNegativeKeyConfig;
-  y?: PositiveAndNegativeKeyConfig;
-  z?: PositiveAndNegativeKeyConfig;
 }
 
 export const defaultSHRotateMotionConfig: SHRotateMotionConfig = {

@@ -1,5 +1,11 @@
 import React, {ChangeEvent} from 'react';
-import {ApplicationShortCut} from '../types';
+import {
+  ApplicationShortCut,
+  KeyConfig,
+  PositiveAndNegativeKeyConfig,
+  SHButtonConfig, SHGestureMotionConfig, SHMotionConfig,
+  SHRotateMotionConfig
+} from '../types';
 import NativeSelect from '@mui/material/NativeSelect';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
@@ -8,13 +14,9 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import {
   defaultSHMotionButtonConfig,
   getDefaultMotionConfigForType,
-  KeyConfig,
-  PositiveAndNegativeKeyConfig,
   rotateAxes,
-  SHButtonConfig,
-  SHGestureMotionConfig,
-  SHMotionConfig,
-  SHRotateMotionConfig,
+
+
 } from '../models/SHConConfig';
 import {KeypadButton} from '../models/keypads';
 import {KeySelectorCells} from './KeyConfigCommon';

@@ -1,5 +1,4 @@
-import {ModifierKeyBase} from './SHConConfig';
-import {Writable} from '../types';
+import {ModifierKeyBase, Writable} from '../types';
 
 export interface ModifierKey extends ModifierKeyBase {
   readonly label: string;

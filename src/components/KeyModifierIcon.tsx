@@ -1,6 +1,6 @@
 import React from 'react';
-import {KeyConfig} from '../models/SHConConfig';
 import {styled} from '@mui/material';
+import {KeyConfig} from "../types";
 
 const RootDiv = styled('div')`
   width: 24px;

@@ -1,7 +1,6 @@
 import React, {ChangeEvent} from 'react';
-import {KeyConfig, SHStickConfig} from '../models/SHConConfig';
 import {KeypadStick} from '../models/keypads';
-import {ApplicationShortCut} from '../types';
+import {ApplicationShortCut, KeyConfig, SHStickConfig} from '../types';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import {BreakableLabel} from './BreakableLabel';

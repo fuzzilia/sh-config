@@ -1,5 +1,5 @@
 import React, {useCallback} from 'react';
-import {ApplicationShortCut, KeyConfigByCombination, SetterFunc} from '../types';
+import {ApplicationShortCut, KeyConfigByCombination, SetterFunc, SHButtonConfig, SHStickConfig} from '../types';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -12,7 +12,6 @@ import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import {ButtonConfigRow} from './ButtonConfigRow';
-import {SHButtonConfig, SHStickConfig} from '../models/SHConConfig';
 import {Keypad, KeypadButton} from '../models/keypads';
 import {StickConfigRow} from './StickConfigRow';
 import {styled} from '@mui/material';
