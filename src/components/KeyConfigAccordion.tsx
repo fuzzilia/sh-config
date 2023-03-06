@@ -1,7 +1,6 @@
 import React, {useCallback} from 'react';
 import {ApplicationShortCut, KeyConfigByCombination, SetterFunc, SHButtonConfig, SHStickConfig} from '../types';
 import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -15,6 +14,7 @@ import {ButtonConfigRow} from './ButtonConfigRow';
 import {Keypad, KeypadButton} from '../models/keypads';
 import {StickConfigRow} from './StickConfigRow';
 import {styled} from '@mui/material';
+import {SettingAccordionDetails, SettingAccordionTitle} from './Common';
 
 interface KeyConfigAccordionProps {
   readonly keypad: Keypad;
@@ -26,13 +26,6 @@ interface KeyConfigAccordionProps {
   readonly applicationShortCuts: readonly ApplicationShortCut[] | undefined;
 }
 
-const Title = styled(Typography)`
-  font-size: ${({theme}) => theme.typography.pxToRem(15)};
-  flex-basis: 20%;
-  flex-shrink: 0;
-  align-self: center;
-`;
-
 const CombinationLabel = styled(Typography)`
   font-size: ${({theme}) => theme.typography.pxToRem(15)};
   color: ${({theme}) => theme.palette.text.secondary};
@@ -41,10 +34,6 @@ const CombinationLabel = styled(Typography)`
 
 const ButtonChip = styled(Chip)`
   margin-left: ${({theme}) => theme.spacing(1)};
-`;
-
-const MainAccordionDetails = styled(AccordionDetails)`
-  overflow-x: auto;
 `;
 
 function replaceAt<T>(values: readonly (T | undefined)[], value: T, index: number): (T | undefined)[] {
@@ -80,7 +69,7 @@ export const KeyConfigAccordion = React.memo<KeyConfigAccordionProps>(
     return (
       <Accordion defaultExpanded={index === 0}>
         <AccordionSummary expandIcon={<ExpandMore />}>
-          <Title>キー設定</Title>
+          <SettingAccordionTitle>キー設定</SettingAccordionTitle>
           <CombinationLabel>組み合わせ : </CombinationLabel>
           {combinationButtons.map((button, index) => (
             <ButtonChip
@@ -92,7 +81,7 @@ export const KeyConfigAccordion = React.memo<KeyConfigAccordionProps>(
             // <CombinationButtonStateView key={button.name} label={button.label} isOn={combinationButtonStates[index]} />
           ))}
         </AccordionSummary>
-        <MainAccordionDetails>
+        <SettingAccordionDetails>
           <Table size="small">
             <TableHead>
               <TableRow>
@@ -130,7 +119,7 @@ export const KeyConfigAccordion = React.memo<KeyConfigAccordionProps>(
               ))}
             </TableBody>
           </Table>
-        </MainAccordionDetails>
+        </SettingAccordionDetails>
       </Accordion>
     );
   },

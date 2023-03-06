@@ -75,16 +75,16 @@ export const ApplicationShortcutSelector: React.FC<ApplicationShortcutSelectorPr
   );
 };
 
-interface KeySelectorProps {
-  readonly onChange: (key: KeyConfig | undefined) => void;
-  readonly keyConfig: KeyConfig | undefined;
+interface KeySelectorProps<KC extends KeyConfig> {
+  readonly onChange: (key: KC | undefined) => void;
+  readonly keyConfig: KC | undefined;
 }
 
-export const KeySelector: React.FC<KeySelectorProps> = ({keyConfig, onChange}) => {
+export function KeySelector<KC extends KeyConfig>({keyConfig, onChange}: KeySelectorProps<KC>) {
   return (
     <CommonSelect
       value={keyConfig?.key || ''}
-      onChange={(e) => onChange(e.target.value ? {...keyConfig, key: Number(e.target.value)} : undefined)}>
+      onChange={(e) => onChange(e.target.value ? ({...keyConfig, key: Number(e.target.value)} as KC) : undefined)}>
       <option value="" />
       {keyCodes.map(([key, keyCode]) => (
         <option key={key} value={keyCode}>
@@ -93,7 +93,7 @@ export const KeySelector: React.FC<KeySelectorProps> = ({keyConfig, onChange}) =
       ))}
     </CommonSelect>
   );
-};
+}
 
 const RootBox = styled(Box)`
   display: flex;

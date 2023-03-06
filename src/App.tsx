@@ -15,7 +15,14 @@ import {
   combinationButtonCountToCombinationCount,
   makeCombinations,
 } from './models/KeyConfig';
-import {ApplicationShortCut, KeyConfigByCombination, KeyConfigState, OsType, SetterFunc} from './types';
+import {
+  ApplicationShortcut,
+  ApplicationShortCut,
+  KeyConfigByCombination,
+  KeyConfigState,
+  OsType,
+  SetterFunc,
+} from './types';
 import {KeyConfigAccordion} from './components/KeyConfigAccordion';
 import InputLabel from '@mui/material/InputLabel';
 import NativeSelect from '@mui/material/NativeSelect';
@@ -30,6 +37,7 @@ import {keyConfigStateToSHConfig, setConfigForCombinationForKeyConfigState} from
 import {encodeSHConfig} from './models/SHConfigEncoder';
 import {FormLabel, FormOptionButton, FormRowBox, FormTextField, FormValueText} from './components/FormCommon';
 import {DeviceFormRow} from './components/DeviceFormRow';
+import {ApplicationShortcutForm} from './components/ApplicationShortcutForm';
 
 const MainContentBox = styled(Box)`
   display: flex;
@@ -75,6 +83,8 @@ export const App: React.FC = () => {
   const [combinationIsFixed, setCombinationIsFixed] = useState<boolean>(false);
   const [osType, setOsType] = useState<OsType | undefined>(undefined);
   const [application, setApplication] = useState<string | undefined>(undefined);
+  const [editingShortcut, setEditingShortcut] = useState<ApplicationShortcut>();
+
   const selectedKeypad: Keypad | undefined =
     configState && keypads.find((keypad) => keypad.name === configState.selectedKeypad);
   const combinationButtonCount = configState ? configState.selectedCombinationButtonNames.length : 0;
@@ -277,8 +287,10 @@ export const App: React.FC = () => {
               onChange={onChangeCombination}
             />
           )
+        ) : editingShortcut ? (
+          <ApplicationShortcutForm initialShortcut={editingShortcut} />
         ) : (
-          <SelectKeypadPanel onChange={setKeyConfigState} />
+          <SelectKeypadPanel onChange={setKeyConfigState} onStartEditShortcut={setEditingShortcut} />
         )}
       </Container>
     </div>

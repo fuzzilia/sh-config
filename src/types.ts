@@ -128,6 +128,20 @@ export interface ApplicationShortCutDefinition {
   readonly shortcuts: ApplicationShortCutDefinitionItem[];
 }
 
+export interface ApplicationShortcutItem extends ShortCut {
+  readonly name: string;
+}
+
+export interface ApplicationShortcutGroup {
+  readonly name: string;
+  readonly shortcuts: readonly ApplicationShortcutItem[];
+}
+
+export interface ApplicationShortcut {
+  readonly applicationName: string;
+  readonly groups: readonly ApplicationShortcutGroup[];
+}
+
 export enum OsType {
   IOS = 1,
   WINDOWS,

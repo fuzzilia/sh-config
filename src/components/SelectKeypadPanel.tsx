@@ -7,10 +7,11 @@ import InputLabel from '@mui/material/InputLabel';
 import NativeSelect from '@mui/material/NativeSelect';
 import {isJoycon, KeypadName, keypads} from '../models/keypads';
 import {SavedConfigsPanel} from './SavedConfigsPanel';
-import {KeyConfigState} from '../types';
-import {defaultKeyConfigsByKeypadName} from '../models/KeyConfig';
+import {ApplicationShortcut, KeyConfigState} from '../types';
+import {defaultKeyConfigsByKeypadName, keyToKeyCode} from '../models/KeyConfig';
 import {styled} from '@mui/material';
 import {JoyConAlert} from './JoyConAlert';
+import Button from '@mui/material/Button';
 
 const RootBox = styled(Box)`
   display: flex;
@@ -28,9 +29,10 @@ const DeviceFormControl = styled(FormControl)`
 
 export interface SelectKeypadPanelProps {
   onChange(keyConfigState: KeyConfigState, combinationIsFixed: boolean): void;
+  onStartEditShortcut(shortcut: ApplicationShortcut): void;
 }
 
-export const SelectKeypadPanel: React.FC<SelectKeypadPanelProps> = ({onChange}) => {
+export const SelectKeypadPanel: React.FC<SelectKeypadPanelProps> = ({onChange, onStartEditShortcut}) => {
   const [joyconKeypadName, setJoyconKeypadName] = useState<KeypadName>();
   const closeJoyconModal = useCallback(() => setJoyconKeypadName(undefined), []);
   const change = useCallback(
@@ -76,6 +78,26 @@ export const SelectKeypadPanel: React.FC<SelectKeypadPanelProps> = ({onChange}) 
       <MainCard>
         <CardHeader title="ブラウザに保存された設定をロード" />
         <SavedConfigsPanel onLoad={changeBySavedConfigsPanel} />
+      </MainCard>
+      <MainCard>
+        <CardHeader title="ショートカットキー定義" />
+        <Button
+          onClick={() =>
+            onStartEditShortcut({
+              applicationName: '新規アプリ',
+              groups: [
+                {
+                  name: 'メイン',
+                  shortcuts: [
+                    {name: 'コピー', key: keyToKeyCode.get('C'), ctrl: true},
+                    {name: 'ペースト', key: keyToKeyCode.get('X'), ctrl: true},
+                  ],
+                },
+              ],
+            })
+          }>
+          作成
+        </Button>
       </MainCard>
       <JoyConAlert isOpen={joyconKeypadName !== undefined} onClose={closeJoyconModal} onSubmit={submitJoyconAlert} />
     </RootBox>
