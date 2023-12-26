@@ -53,7 +53,12 @@ interface Options {
   isConnector?: boolean;
 }
 
-export class KeyConfigService {
+export interface KeyConfigServiceCommon {
+  writeConfig(config: SHConConfig): Promise<void>;
+  disconnect(): void;
+}
+
+export class KeyConfigService implements KeyConfigServiceCommon {
   public static async connect(
     bluetooth: Bluetooth,
     onClose: () => void,

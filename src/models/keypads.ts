@@ -108,11 +108,75 @@ export const keypadShControllerNrf52_v1 = inferKeypadType({
   has6AxisSensor: false,
 } as const);
 
-// export const keypads = [keypadShControllerV1, keypadJoyConL, keypadJoyConR];
-export const keypads = [keypadShControllerNrf52_v1];
+export const keypadShControllerNrf52_xiao_r = inferKeypadType({
+  name: 'sh-controller-nrf52-v2-r',
+  label: 'SH-Controller nRF52 v2 (右手用)',
+  id: 0x0003,
+  buttons: [
+    {name: 'u1', number: 3, label: '上1'},
+    {name: 'l1', number: 4, label: '下1'},
+    {name: 'u2', number: 5, label: '上2'},
+    {name: 'l2', number: 6, label: '下2'},
+    {name: 'u3', number: 7, label: '上3'},
+    {name: 'l3', number: 8, label: '下3'},
+    {name: '4', number: 9, label: '4'},
+    {name: 'r', number: 0, label: 'R'},
+    {name: 'l', number: 1, label: 'L'},
+    {name: 'z', number: 2, label: 'Z'},
+  ],
+  sticks: [{name: '0', number: 0, label: 'スティック'}],
+  has6AxisSensor: false,
+} as const);
 
-export type KeypadName = typeof keypads[number]['name'];
-export type KeypadButtons = typeof keypads[number]['buttons'];
+export const keypadShControllerNrf52_xiao_l = inferKeypadType({
+  name: 'sh-controller-nrf52-v2-l',
+  label: 'SH-Controller nRF52 v2 (左手用)',
+  id: 0x0004,
+  buttons: [
+    {name: 'u1', number: 4, label: '上1'},
+    {name: 'l1', number: 3, label: '下1'},
+    {name: 'u2', number: 6, label: '上2'},
+    {name: 'l2', number: 5, label: '下2'},
+    {name: 'u3', number: 8, label: '上3'},
+    {name: 'l3', number: 7, label: '下3'},
+    {name: '4', number: 9, label: '4'},
+    {name: 'r', number: 0, label: 'R'},
+    {name: 'l', number: 1, label: 'L'},
+    {name: 'z', number: 2, label: 'Z'},
+  ],
+  sticks: [{name: '0', number: 0, label: 'スティック'}],
+  has6AxisSensor: false,
+} as const);
+
+export const keypadShControllerNrf52_xiaoSense_r = {
+  name: 'sh-controller-nrf52-v2-sense-r',
+  label: 'SH-Controller nRF52 v2 (右手用/ジャイロ有)',
+  id: 0x0005,
+  buttons: keypadShControllerNrf52_xiao_r.buttons,
+  sticks: keypadShControllerNrf52_xiao_r.sticks,
+  has6AxisSensor: true,
+} as const;
+
+export const keypadShControllerNrf52_xiaoSense_l = {
+  name: 'sh-controller-nrf52-v2-sense-l',
+  label: 'SH-Controller nRF52 v2 (左手用/ジャイロ有)',
+  id: 0x0006,
+  buttons: keypadShControllerNrf52_xiao_l.buttons,
+  sticks: keypadShControllerNrf52_xiao_l.sticks,
+  has6AxisSensor: true,
+} as const;
+
+// export const keypads = [keypadShControllerV1, keypadJoyConL, keypadJoyConR];
+export const keypads = [
+  keypadShControllerNrf52_v1,
+  keypadShControllerNrf52_xiao_r,
+  keypadShControllerNrf52_xiao_l,
+  keypadShControllerNrf52_xiaoSense_r,
+  keypadShControllerNrf52_xiaoSense_l,
+];
+
+export type KeypadName = (typeof keypads)[number]['name'];
+export type KeypadButtons = (typeof keypads)[number]['buttons'];
 
 export function isJoycon(keypad: Keypad): boolean {
   return keypad.id === keypadJoyConL.id || keypad.id === keypadJoyConR.id;

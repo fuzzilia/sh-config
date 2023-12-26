@@ -178,7 +178,13 @@ interface CommonRowProps {
   readonly onChangeType: (type: string) => void;
 }
 
-const CommonRow: React.FC<CommonRowProps> = ({label, childRowCount, type, onChangeType, children}) => {
+const CommonRow: React.FC<React.PropsWithChildren<CommonRowProps>> = ({
+  label,
+  childRowCount,
+  type,
+  onChangeType,
+  children,
+}) => {
   return (
     <>
       <TableRow>

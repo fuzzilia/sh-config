@@ -172,6 +172,30 @@ export const defaultKeyConfigsByKeypadName: Record<KeypadName, Omit<KeyConfigSta
     selectedCombinationButtonNames: ['z1', 'z2', 'z3'],
     configsByCombination: [...Array(8)].map(() => defaultKeyConfigByCombination),
   },
+  'sh-controller-nrf52-v2-r': {
+    label: '名称未設定',
+    selectedKeypad: 'sh-controller-nrf52-v2-r',
+    selectedCombinationButtonNames: ['r', 'l', 'z'],
+    configsByCombination: [...Array(8)].map(() => defaultKeyConfigByCombination),
+  },
+  'sh-controller-nrf52-v2-l': {
+    label: '名称未設定',
+    selectedKeypad: 'sh-controller-nrf52-v2-l',
+    selectedCombinationButtonNames: ['r', 'l', 'z'],
+    configsByCombination: [...Array(8)].map(() => defaultKeyConfigByCombination),
+  },
+  'sh-controller-nrf52-v2-sense-r': {
+    label: '名称未設定',
+    selectedKeypad: 'sh-controller-nrf52-v2-sense-r',
+    selectedCombinationButtonNames: ['r', 'l', 'z'],
+    configsByCombination: [...Array(8)].map(() => defaultKeyConfigByCombination),
+  },
+  'sh-controller-nrf52-v2-sense-l': {
+    label: '名称未設定',
+    selectedKeypad: 'sh-controller-nrf52-v2-sense-l',
+    selectedCombinationButtonNames: ['r', 'l', 'z'],
+    configsByCombination: [...Array(8)].map(() => defaultKeyConfigByCombination),
+  },
   // 'sh-controller-v1': {
   //   label: '名称未設定',
   //   selectedKeypad: 'sh-controller-v1',

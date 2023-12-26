@@ -2,10 +2,12 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {FormLabel, FormOptionButton, FormRowBox, FormValueText} from './FormCommon';
 import {isJoycon, Keypad} from '../models/keypads';
 import {PairingModal} from './PairingModal';
-import {KeyConfigService} from '../models/KeyConfigService';
+import {KeyConfigService, KeyConfigServiceCommon} from '../models/KeyConfigService';
 import {JoyConTestModal} from './JoyConTestModal';
 import {keyConfigStateToSHConfig} from '../models/SHConConfig';
 import {KeyConfigState} from '../types';
+import {errorToMessage} from '../models/utils';
+import {KeyConfigHidService} from '../models/KeyConfigHidService';
 
 interface DeviceFormRowProps {
   keypad: Keypad;
@@ -13,8 +15,8 @@ interface DeviceFormRowProps {
 }
 
 export const DeviceFormRow: React.FC<DeviceFormRowProps> = ({keypad, configState}) => {
-  const [keyConfigService, setKeyConfigService] = useState<KeyConfigService>();
-  const keyConfigServiceRef = useRef<KeyConfigService | undefined>();
+  const [keyConfigService, setKeyConfigService] = useState<KeyConfigServiceCommon>();
+  const keyConfigServiceRef = useRef<KeyConfigServiceCommon | undefined>();
   keyConfigServiceRef.current = keyConfigService;
   const [testModalIsOpen, setTestModalIsOpen] = useState<boolean>(false);
   const [pairingModelIsOpen, setPairingModalIsOpen] = useState<boolean>(false);
@@ -38,10 +40,29 @@ export const DeviceFormRow: React.FC<DeviceFormRowProps> = ({keypad, configState
         setKeyConfigService(service);
       } catch (error) {
         console.error(error);
-        alert(error?.message ?? '不明なエラーが発生しました。');
+        alert(errorToMessage(error));
       }
     }
   }, [keyConfigService]);
+
+  const connectAsHid = useCallback(async () => {
+    if (!keyConfigService) {
+      try {
+        if (!navigator.hid) {
+          alert('WebHID未対応のブラウザです。');
+          return;
+        }
+        const service = await KeyConfigHidService.connect(navigator.hid, () => {
+          setKeyConfigService(undefined);
+        });
+        setKeyConfigService(service);
+      } catch (error) {
+        console.error(error);
+        alert(errorToMessage(error));
+      }
+    }
+  }, [keyConfigService]);
+
   const writeConfig = useCallback(async () => {
     if (!keyConfigService) {
       alert('未接続です。');
@@ -57,7 +78,7 @@ export const DeviceFormRow: React.FC<DeviceFormRowProps> = ({keypad, configState
       alert('書き込みに成功しました。');
     } catch (error) {
       console.error(error);
-      alert(error?.message ? `エラーが発生しました。${error.message}` : '不明なエラーが発生しました。');
+      alert(errorToMessage(error));
     } finally {
       setIsWriting(false);
     }
@@ -92,12 +113,19 @@ export const DeviceFormRow: React.FC<DeviceFormRowProps> = ({keypad, configState
       ) : (
         <>
           <FormOptionButton variant="outlined" color="primary" onClick={connect}>
-            接続
+            無線接続
+          </FormOptionButton>
+          <FormOptionButton variant="outlined" color="primary" onClick={connectAsHid}>
+            HID接続
           </FormOptionButton>
         </>
       )}
       <JoyConTestModal keypad={keypad} onClose={closeTestModal} isOpen={testModalIsOpen} configState={configState} />
-      <PairingModal keyConfigService={keyConfigService} onClose={closePairingModal} isOpen={pairingModelIsOpen} />
+      <PairingModal
+        keyConfigService={keyConfigService instanceof KeyConfigService ? keyConfigService : undefined}
+        onClose={closePairingModal}
+        isOpen={pairingModelIsOpen}
+      />
     </FormRowBox>
   );
 };
