@@ -110,7 +110,7 @@ export const keypadShControllerNrf52_v1 = inferKeypadType({
 
 export const keypadShControllerNrf52_xiao_r = inferKeypadType({
   name: 'sh-controller-nrf52-v2-r',
-  label: 'SH-Controller nRF52 v2 (右手用)',
+  label: 'SH-Controller nRF52/RP2040 v2 (右手用)',
   id: 0x0003,
   buttons: [
     {name: 'u1', number: 3, label: '上1'},
@@ -130,7 +130,7 @@ export const keypadShControllerNrf52_xiao_r = inferKeypadType({
 
 export const keypadShControllerNrf52_xiao_l = inferKeypadType({
   name: 'sh-controller-nrf52-v2-l',
-  label: 'SH-Controller nRF52 v2 (左手用)',
+  label: 'SH-Controller nRF52/RP2040 v2 (左手用)',
   id: 0x0004,
   buttons: [
     {name: 'u1', number: 4, label: '上1'},
