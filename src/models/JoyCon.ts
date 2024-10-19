@@ -167,7 +167,7 @@ export class JoyCon {
         // Left
         0x00, 0x01, 0x40, 0x40,
         // Right
-        0x00, 0x01, 0x40, 0x45,
+        0x00, 0x01, 0x40, 0x55,
       ]),
     );
   }
@@ -222,4 +222,14 @@ export class JoyCon {
       vertical: capStickValue((raw.vertical - this.stickCenter.vertical) / 1900),
     };
   }
+}
+
+function makeRumbleCommand(): Uint8Array {
+  return new Uint8Array([
+    0,
+    // Left
+    0x00, 0x01, 0x40, 0x40,
+    // Right
+    0x00, 0x01, 0x40, 0x40,
+  ])
 }

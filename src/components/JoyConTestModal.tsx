@@ -7,6 +7,7 @@ import Grid from '@mui/material/Grid';
 import ArrowUpward from '@mui/icons-material/ArrowUpward';
 import {
   EightButtonDirection,
+  RumbleState,
   SHControllerManager,
   SHControllerState,
   SHMotionState,
@@ -157,6 +158,15 @@ export const JoyConTestModal: React.FC<JoyConTestModalProps> = ({keypad, configS
           }
           if (state.keys.length > 0) {
             setKeys((prev) => prev.concat(state.keys));
+          }
+          switch (state.rumble) {
+            case RumbleState.CW:
+            case RumbleState.CCW:
+              (async () => {
+                await joyCon?.sendRumble()
+                await waitAsync(30);
+                await joyCon?.stopRumble()
+              })();
           }
         };
       } catch (error) {

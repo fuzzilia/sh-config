@@ -30,6 +30,11 @@ export const eightButtonDirections: readonly EightButtonDirection[] = [
   'upLeftKey',
 ];
 
+export const enum RumbleState {
+  CW = 1,
+  CCW = 2,
+}
+
 interface SHFourButtonStickState {
   readonly type: '4-button';
   readonly keys: readonly KeyConfig[];
@@ -180,6 +185,7 @@ export interface MotionSensorValue {
 export interface SHRotateMotionState {
   readonly type: 'rotate';
   readonly keys: readonly KeyConfig[];
+  readonly rumble: RumbleState | undefined;
   readonly lastKeyIsAlive?: undefined;
   readonly lockedAxis?: 'x' | 'y' | 'z';
   readonly rotationState: ThreeDimensionValue<ProcessRotateRelativeState>;
@@ -188,6 +194,7 @@ export interface SHRotateMotionState {
 export interface SHGestureMotionState {
   readonly type: 'gesture';
   readonly keys: readonly KeyConfig[];
+  readonly rumble: RumbleState | undefined;
   readonly lastKeyIsAlive?: boolean;
   readonly firstGesture?: MotionGestureType;
 }
@@ -280,6 +287,7 @@ class MotionSensorManager {
           this.lastConfig = config;
           return {
             type: 'gesture',
+            rumble: undefined,
             keys: [],
           };
         }
@@ -287,6 +295,7 @@ class MotionSensorManager {
           return {
             type: 'gesture',
             keys: [],
+            rumble: undefined,
             lastKeyIsAlive: this.gestureState.firstGestureHasKey,
             firstGesture: this.gestureState.firstGesture,
           };
@@ -310,7 +319,7 @@ class MotionSensorManager {
         const key = firstGesture && config.rotate?.[firstGesture.axis]?.[firstGesture.positiveOrNegative];
         const keys = key ? [key] : [];
         this.gestureState = {firstGesture, rotation, firstGestureHasKey: !!key};
-        return {type: 'gesture', keys, firstGesture, lastKeyIsAlive: !!key};
+        return {type: 'gesture', keys, rumble: undefined, firstGesture, lastKeyIsAlive: !!key};
       }
 
       case 'rotate': {
@@ -326,6 +335,7 @@ class MotionSensorManager {
           return {
             type: 'rotate',
             keys: [],
+            rumble: undefined,
             lockedAxis: undefined,
             rotationState: this.rotateState.rotationState,
           };
@@ -361,6 +371,7 @@ class MotionSensorManager {
           rotationState: nextState,
         };
         const keys: KeyConfig[] = [];
+        let rumble: RumbleState | undefined;
         rotateAxes.forEach((axis) => {
           const countDiff = rotation[axis].countDiff;
           if (countDiff > 0) {
@@ -368,14 +379,16 @@ class MotionSensorManager {
             if (keyConfig) {
               keys.push(...[...Array(countDiff)].map(() => keyConfig));
             }
+            rumble = RumbleState.CW;
           } else if (countDiff < 0) {
             const keyConfig = config[axis]?.negative;
             if (keyConfig) {
               keys.push(...[...Array(-countDiff)].map(() => keyConfig));
             }
+            rumble = RumbleState.CCW;
           }
         });
-        return {type: 'rotate', keys, lockedAxis, rotationState: nextState};
+        return {type: 'rotate', keys, rumble, lockedAxis, rotationState: nextState};
       }
     }
   }
@@ -388,6 +401,7 @@ export interface SHControllerState {
   readonly pushedButtonName: string | undefined;
   readonly motion?: SHMotionState;
   readonly lastKeyIsAlive: boolean;
+  readonly rumble: RumbleState | undefined;
 }
 
 export class SHControllerManager {
@@ -467,6 +481,6 @@ export class SHControllerManager {
       }
     });
     this.lastButtonKey = buttonKey;
-    return {keys, sticks, motion, combination, pushedButtonName, lastKeyIsAlive};
+    return {keys, sticks, motion, combination, pushedButtonName, lastKeyIsAlive, rumble: motion?.rumble};
   }
 }
