@@ -7,6 +7,7 @@ const filters = [
 ];
 
 const commandOutputReportId = 0x01;
+const rumbleOnlyOutputReportId = 0x10;
 const commandPadding = [...Array(9)].map(() => 0x00);
 function makeCommand(subcommand: readonly number[]): Uint8Array {
   return new Uint8Array([...commandPadding, ...subcommand]);
@@ -88,8 +89,8 @@ enum JoyConInputReportId {
   Simple = 0x3f,
 }
 
-export type JoyConInputLeftButtonStatus = Readonly<Record<typeof leftJoyConButtons[number], boolean>>;
-export type JoyConInputRightButtonStatus = Readonly<Record<typeof rightJoyConButtons[number], boolean>>;
+export type JoyConInputLeftButtonStatus = Readonly<Record<(typeof leftJoyConButtons)[number], boolean>>;
+export type JoyConInputRightButtonStatus = Readonly<Record<(typeof rightJoyConButtons)[number], boolean>>;
 export interface JoyConInputLeft {
   readonly rightOrLeft: 'left';
   readonly buttons: JoyConInputLeftButtonStatus;
@@ -152,6 +153,36 @@ export class JoyCon {
 
   public async enableIMU(enabled = true): Promise<void> {
     await this.device.sendReport(commandOutputReportId, makeCommand([0x40, enabled ? 0x01 : 0x00]));
+  }
+
+  public async enableVibration(enabled = true): Promise<void> {
+    await this.device.sendReport(commandOutputReportId, makeCommand([0x48, enabled ? 0x01 : 0x00]));
+  }
+
+  public async sendRumble(): Promise<void> {
+    await this.device.sendReport(
+      rumbleOnlyOutputReportId,
+      new Uint8Array([
+        0,
+        // Left
+        0x00, 0x01, 0x40, 0x40,
+        // Right
+        0x00, 0x01, 0x40, 0x45,
+      ]),
+    );
+  }
+
+  public async stopRumble(): Promise<void> {
+    await this.device.sendReport(
+      rumbleOnlyOutputReportId,
+      new Uint8Array([
+        0,
+        // Left
+        0x00, 0x01, 0x40, 0x40,
+        // Right
+        0x00, 0x01, 0x40, 0x40,
+      ]),
+    );
   }
 
   private onInputReport = (event: HIDInputReportEvent): void => {

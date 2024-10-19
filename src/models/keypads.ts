@@ -168,6 +168,8 @@ export const keypadShControllerNrf52_xiaoSense_l = {
 
 // export const keypads = [keypadShControllerV1, keypadJoyConL, keypadJoyConR];
 export const keypads = [
+  keypadJoyConL,
+  keypadJoyConR,
   keypadShControllerNrf52_v1,
   keypadShControllerNrf52_xiao_r,
   keypadShControllerNrf52_xiao_l,

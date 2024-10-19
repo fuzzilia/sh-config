@@ -100,6 +100,21 @@ export const JoyConTestModal: React.FC<JoyConTestModalProps> = ({keypad, configS
         await waitAsync(100);
         await joyCon.enableIMU(true);
 
+        await waitAsync(100);
+        // await joyCon.enableVibration(true);
+        await waitAsync(100);
+        await joyCon.sendRumble();
+        await waitAsync(300);
+        await joyCon.stopRumble();
+        await waitAsync(300);
+        await joyCon.sendRumble();
+        await waitAsync(300);
+        await joyCon.stopRumble();
+        await waitAsync(300);
+        await joyCon.sendRumble();
+        await waitAsync(300);
+        await joyCon.stopRumble();
+
         let joyConInput: JoyConInput | undefined = undefined;
         const manager = new SHControllerManager(
           8,

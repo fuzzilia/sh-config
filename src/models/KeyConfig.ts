@@ -202,18 +202,18 @@ export const defaultKeyConfigsByKeypadName: Record<KeypadName, Omit<KeyConfigSta
   //   selectedCombinationButtonNames: ['8', '9', '10'],
   //   configsByCombination: [...Array(8)].map(() => defaultKeyConfigByCombination),
   // },
-  // 'joy-con-L': {
-  //   label: '名称未設定',
-  //   selectedKeypad: 'joy-con-L',
-  //   selectedCombinationButtonNames: ['l', 'zl'],
-  //   configsByCombination: [...Array(4)].map(() => defaultKeyConfigByCombination),
-  // },
-  // 'joy-con-R': {
-  //   label: '名称未設定',
-  //   selectedKeypad: 'joy-con-R',
-  //   selectedCombinationButtonNames: ['r', 'zr'],
-  //   configsByCombination: [...Array(4)].map(() => defaultKeyConfigByCombination),
-  // },
+  'joy-con-L': {
+    label: '名称未設定',
+    selectedKeypad: 'joy-con-L',
+    selectedCombinationButtonNames: ['l', 'zl'],
+    configsByCombination: [...Array(4)].map(() => defaultKeyConfigByCombination),
+  },
+  'joy-con-R': {
+    label: '名称未設定',
+    selectedKeypad: 'joy-con-R',
+    selectedCombinationButtonNames: ['r', 'zr'],
+    configsByCombination: [...Array(4)].map(() => defaultKeyConfigByCombination),
+  },
 };
 
 export const applicationShortCutDefinitions: readonly ApplicationShortCutDefinition[] = [
