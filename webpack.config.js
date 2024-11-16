@@ -31,6 +31,10 @@ module.exports = {
     ],
   },
 
+  experiments: {
+    asyncWebAssembly: true,
+  },
+
   resolve: {
     extensions: ['.js', '.web.ts', '.ts', '.tsx', '.css'],
   },
@@ -39,7 +43,7 @@ module.exports = {
     port: 8081,
     static: {
       directory: path.resolve(__dirname, 'public'),
-    }
+    },
   },
 
   plugins: [

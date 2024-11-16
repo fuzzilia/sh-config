@@ -89,6 +89,13 @@ export const App: React.FC = () => {
     [selectedKeypad, combinationButtonNames],
   );
 
+  (async () => {
+    const core1 = await import('core');
+    const core2 = await core1.default;
+    console.log(core1, core2);
+    core2.greet('taro');
+  })();
+
   const changeConfigsByCombination = useCallback(
     (combinationIndex: number, setConfig: SetterFunc<KeyConfigByCombination>) =>
       setConfigState(
