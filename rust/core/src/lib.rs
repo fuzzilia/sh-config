@@ -1,13 +1,15 @@
 use std::borrow::BorrowMut;
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::{LazyLock, Mutex};
 use wasm_bindgen::prelude::*;
+
+mod config;
 
 pub struct ControllerState {
     count: i32,
 }
 
-static STATE_MAP: Mutex<HashMap<String, ControllerState>> = Mutex::new(HashMap::new());
+static STATE_MAP: LazyLock<Mutex<HashMap<String, ControllerState>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 
 #[wasm_bindgen]
 extern "C" {

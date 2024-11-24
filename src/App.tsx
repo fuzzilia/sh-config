@@ -69,6 +69,8 @@ const OsFormControl = styled(FormControl)`
   width: 80px;
 `;
 
+let execCount: ((key: string) => number) | undefined;
+
 export const App: React.FC = () => {
   const [configState, setConfigState] = useState<KeyConfigState | undefined>(undefined);
   const [lastSavedConfig, setLastSavedConfig] = useState<KeyConfigState | undefined>(undefined);
@@ -94,6 +96,7 @@ export const App: React.FC = () => {
     const core2 = await core1.default;
     console.log(core1, core2);
     core2.greet('taro');
+    execCount = core2.count;
   })();
 
   const changeConfigsByCombination = useCallback(
@@ -285,7 +288,11 @@ export const App: React.FC = () => {
             />
           )
         ) : (
-          <SelectKeypadPanel onChange={setKeyConfigState} />
+          <div>
+            {/*<SelectKeypadPanel onChange={setKeyConfigState} />*/}
+            <button onClick={() => console.log(execCount?.('key2'))}>key2</button>
+            <button onClick={() => console.log(execCount?.('key1'))}>key1</button>
+          </div>
         )}
       </Container>
     </div>
