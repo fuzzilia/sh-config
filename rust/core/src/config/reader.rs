@@ -22,8 +22,8 @@ impl Button {
         Button {value}
     }
     
-    pub fn get_type() -> ButtonType {
-        ButtonType::from_u8().unwrap()
+    pub fn get_type(&self) -> ButtonType {
+        ButtonType::from_u8((self.value >> 12) as u8).unwrap()
     }
 }
 
@@ -48,6 +48,7 @@ impl ButtonType {
 }
 
 #[repr(u16)]
+#[derive(Debug)]
 enum ErrorType {
     Uninitialized = 1,
     UnknownVersion,

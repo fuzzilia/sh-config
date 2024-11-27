@@ -9,7 +9,8 @@ pub struct ControllerState {
     count: i32,
 }
 
-static STATE_MAP: LazyLock<Mutex<HashMap<String, ControllerState>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
+static STATE_MAP: LazyLock<Mutex<HashMap<String, ControllerState>>> =
+    LazyLock::new(|| Mutex::new(HashMap::new()));
 
 #[wasm_bindgen]
 extern "C" {
@@ -31,8 +32,8 @@ pub fn count(key: &str) -> i32 {
             state.count
         }
         None => {
-            state.insert(key.to_string(), ControllerState { count: 0 });
-            0
+            state.insert(key.to_string(), ControllerState { count: 1 });
+            1
         }
     }
 }
